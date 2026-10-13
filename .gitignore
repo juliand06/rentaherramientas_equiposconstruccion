@@ -1,0 +1,27 @@
+# Maven
+target/
+*.class
+*.log
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# Entorno y secretos
+.env
+*.env.local
+application-local.yml
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos subidos en ejecución
+uploads/
+
+# Frontend
+node_modules/
