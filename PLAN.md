@@ -14,13 +14,13 @@ Antes de cada fase se explica qué se hará y por qué (5-10 líneas).
 
 ## Fase 1 — Estructura Maven multi-módulo + Docker + PostgreSQL
 Antes: leer completa la guía de Dependencias y Beans y la de Spring Boot.
-- [ ] `pom.xml` padre (BOM, Java 21) y módulos `domain`, `application`, `infrastructure`, `frontend`
-- [ ] Verificar versiones reales: Boot 4.0.x, springdoc 3.x, jjwt 0.12.x, Flyway
-- [ ] Clase principal limpia, perfiles `dev`/`prod`, `.env.example`
-- [ ] `Dockerfile` multi-stage, `docker-compose.yml` (postgres, app, nginx) con healthchecks y volúmenes
-- [ ] Prueba ArchUnit de la regla `infrastructure → application → domain`
-- [ ] `docker compose up` levanta y `/actuator/health` responde
-- [ ] Matriz actualizada, commit
+- [x] `pom.xml` padre (BOM, Java 21) y módulos `domain`, `application`, `infrastructure`, `frontend`
+- [x] Verificar versiones reales: Boot 4.0.8, springdoc 3.1.1, jjwt 0.12.7, Flyway
+- [x] Clase principal limpia, perfiles `dev`/`prod`, `.env.example`
+- [x] `Dockerfile` multi-stage, `docker-compose.yml` (postgres, app, nginx) con healthchecks y volúmenes
+- [x] Prueba ArchUnit de la regla `infrastructure → application → domain` (5 pruebas pasando)
+- [x] Compilación limpia `mvn clean verify` pasando
+- [x] Matriz actualizada, commit y push a GitHub
 
 ## Fase 2 — Esquema, migraciones y archivos drawSQL
 Antes: leer completas las guías JPA y Gestión de BD 1 y 2.

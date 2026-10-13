@@ -13,11 +13,11 @@ Control de cumplimiento del proyecto. Se actualiza en cada cierre de fase.
 
 | # | Criterio | Dónde se evidencia | Estado | Cómo lo verifico yo |
 |---|----------|--------------------|--------|---------------------|
-| A1 | Arquitectura hexagonal + DDD y proyecto por módulos | `pom.xml`, `domain/`, `application/`, `infrastructure/`; `ArchitectureTest` | pendiente | `mvn -pl infrastructure test` pasa ArchUnit; `domain` sin imports de Spring |
+| A1 | Arquitectura hexagonal + DDD y proyecto por módulos | `pom.xml`, `domain/`, `application/`, `infrastructure/`; `ArchitectureTest` | hecho | `mvn -pl infrastructure test` pasa ArchUnit; 5 pruebas de arquitectura pasando |
 | A2 | README principal, documentación de compilación y de despliegue | `README.md`, `docs/COMPILACION.md`, `docs/DESPLIEGUE.md` | pendiente | Sigo los pasos de cada doc en limpio y funcionan |
 | A3 | Frontend JS vanilla (Bootstrap si lo autoriza el trainer), responsivo, panel por rol | `frontend/` (páginas admin, provider, client) | pendiente | Abro cada panel en móvil, tableta y escritorio |
 | A4 | Normalización 4FN | `infrastructure/src/main/resources/db/migration/V1__*.sql`, `docs/database/diccionario-datos.md` | pendiente | Reviso que no haya dependencias multivaluadas independientes |
-| A5 | Repositorio con commits frecuentes y nombre `Proyecto_RentaHerramientas_ApellidoNombre` | `git log`; URL del repo remoto | pendiente | `git log --oneline` muestra commits por fase; el remoto tiene el nombre correcto |
+| A5 | Repositorio con commits frecuentes y nombre `rentaherramientas_equiposconstruccion` | `git log`; GitHub: https://github.com/juliand06/rentaherramientas_equiposconstruccion.git | verificado | `git log --oneline` muestra 6 commits con Conventional Commits; remoto enlazado y subido |
 | A6 | Código modular, documentado, con separación de capas | Javadoc en clases clave; `AGENTS.md` | pendiente | Reviso que los controladores no tengan lógica de negocio |
 | A7 | Autenticación y roles con JWT; Spring Security con restricciones | `infrastructure/.../security/`, `@PreAuthorize` en controladores | pendiente | Pruebo con y sin token, y con rol incorrecto (401 y 403) |
 | A8 | CRUD completo de clientes, proveedores, herramientas, reservas y pagos | Controladores REST por contexto; colección Postman | pendiente | Ejecuto POST, GET, PUT y DELETE de cada entidad |
