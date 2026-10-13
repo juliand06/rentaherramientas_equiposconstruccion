@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.rentatools</groupId>
+        <artifactId>rentatools</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>frontend</artifactId>
+    <name>frontend</name>
+    <description>Frontend estático (HTML, CSS y JS vanilla). Se sirve con nginx; no usa Node.</description>
+
+    <!--
+      packaging pom: no compila nada. Mantiene el frontend dentro del reactor Maven
+      para que el repositorio sea un solo proyecto, sin añadir una cadena de build de JS.
+    -->
+    <packaging>pom</packaging>
+</project>

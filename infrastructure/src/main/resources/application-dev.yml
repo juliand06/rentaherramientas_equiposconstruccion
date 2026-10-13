@@ -1,0 +1,22 @@
+spring:
+  config:
+    # En local se leen las variables desde el archivo .env de la raíz del proyecto (si existe).
+    # Dentro de Docker las variables llegan por el entorno y este archivo no se usa.
+    import: optional:file:.env[.properties]
+
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+logging:
+  level:
+    root: INFO
+    com.rentatools: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO
+
+springdoc:
+  swagger-ui:
+    try-it-out-enabled: true
