@@ -10,7 +10,7 @@ Antes de cada fase se explica qué se hará y por qué (5-10 líneas).
 - [x] Repos `demo-ddd` y `security` leídos
 - [x] `AGENTS.md`, `DECISIONES.md`, `APRENDIZAJE.md`, `MATRIZ_CUMPLIMIENTO.md`
 - [x] `FASE_0_ENTREGA.md` y `PLAN.md`
-- [ ] **Aprobación del estudiante** (bloquea la Fase 1)
+- [x] **Aprobación del estudiante** (bloquea la Fase 1)
 
 ## Fase 1 — Estructura Maven multi-módulo + Docker + PostgreSQL
 Antes: leer completa la guía de Dependencias y Beans y la de Spring Boot.
@@ -24,12 +24,12 @@ Antes: leer completa la guía de Dependencias y Beans y la de Spring Boot.
 
 ## Fase 2 — Esquema, migraciones y archivos drawSQL
 Antes: leer completas las guías JPA y Gestión de BD 1 y 2.
-- [ ] `V1__schema.sql` (22 tablas, 4FN, PK/FK/UNIQUE/CHECK, índices, `EXCLUDE USING gist`)
-- [ ] `V2__seed_data.sql` (20 o más por entidad principal, roles, usuarios de prueba con BCrypt)
-- [ ] `docs/database/`: `schema-drawsql.sql`, `schema.dbml`, `diagrama-er.mmd` y `.svg`, `diccionario-datos.md`, `INSTRUCCIONES-DRAWSQL.md`
-- [ ] `schema-drawsql.sql` ejecuta sin errores en PostgreSQL limpio
-- [ ] Migraciones corren con Flyway; `ddl-auto: validate` listo
-- [ ] Matriz actualizada, commit
+- [x] `V1__schema.sql` (22 tablas, 4FN, PK/FK/UNIQUE/CHECK, índices, `EXCLUDE USING gist`)
+- [x] `V2__seed_data.sql` (20 o más por entidad principal, roles, usuarios de prueba con BCrypt)
+- [x] `docs/database/`: `schema-drawsql.sql`, `schema.dbml`, `diagrama-er.mmd` y `.svg`, `diccionario-datos.md`, `INSTRUCCIONES-DRAWSQL.md`
+- [x] `schema-drawsql.sql` ejecuta sin errores en PostgreSQL limpio
+- [x] Migraciones corren con Flyway; `ddl-auto: validate` listo
+- [x] Matriz actualizada, commit
 
 ## Fase 3 — Dominio
 - [ ] `common`: `AggregateRoot`, `DomainEvent`, `DomainException`

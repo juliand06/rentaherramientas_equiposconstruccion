@@ -16,14 +16,14 @@ Control de cumplimiento del proyecto. Se actualiza en cada cierre de fase.
 | A1 | Arquitectura hexagonal + DDD y proyecto por módulos | `pom.xml`, `domain/`, `application/`, `infrastructure/`; `ArchitectureTest` | hecho | `mvn -pl infrastructure test` pasa ArchUnit; 5 pruebas de arquitectura pasando |
 | A2 | README principal, documentación de compilación y de despliegue | `README.md`, `docs/COMPILACION.md`, `docs/DESPLIEGUE.md` | pendiente | Sigo los pasos de cada doc en limpio y funcionan |
 | A3 | Frontend JS vanilla (Bootstrap si lo autoriza el trainer), responsivo, panel por rol | `frontend/` (páginas admin, provider, client) | pendiente | Abro cada panel en móvil, tableta y escritorio |
-| A4 | Normalización 4FN | `infrastructure/src/main/resources/db/migration/V1__*.sql`, `docs/database/diccionario-datos.md` | pendiente | Reviso que no haya dependencias multivaluadas independientes |
-| A5 | Repositorio con commits frecuentes y nombre `rentaherramientas_equiposconstruccion` | `git log`; GitHub: https://github.com/juliand06/rentaherramientas_equiposconstruccion.git | verificado | `git log --oneline` muestra 6 commits con Conventional Commits; remoto enlazado y subido |
+| A4 | Normalización 4FN | `infrastructure/src/main/resources/db/migration/V1__schema.sql`, `docs/database/diccionario-datos.md` | verificado | 22 tablas normalizadas en 4FN; documentadas en el diccionario de datos |
+| A5 | Repositorio con commits frecuentes y nombre `rentaherramientas_equiposconstruccion` | `git log`; GitHub: https://github.com/juliand06/rentaherramientas_equiposconstruccion.git | verificado | `git log --oneline` muestra commits con Conventional Commits; remoto enlazado y subido |
 | A6 | Código modular, documentado, con separación de capas | Javadoc en clases clave; `AGENTS.md` | pendiente | Reviso que los controladores no tengan lógica de negocio |
 | A7 | Autenticación y roles con JWT; Spring Security con restricciones | `infrastructure/.../security/`, `@PreAuthorize` en controladores | pendiente | Pruebo con y sin token, y con rol incorrecto (401 y 403) |
 | A8 | CRUD completo de clientes, proveedores, herramientas, reservas y pagos | Controladores REST por contexto; colección Postman | pendiente | Ejecuto POST, GET, PUT y DELETE de cada entidad |
 | A9 | Manejo de errores y excepciones personalizadas | `GlobalExceptionHandler`, `ApiErrorResponse`, excepciones por capa | pendiente | Provoco 400, 404, 409 y 500; el JSON es uniforme |
 | A10 | Pagos y facturación automática; control de disponibilidad; CORS | Contextos `billing` y `rental`; `CorsConfig` | pendiente | Flujo reserva → pago → factura; reserva solapada es rechazada; CORS por variable |
-| A11 | Scripts SQL de creación y datos (mín. 20 registros por entidad); relaciones e índices; diagrama relacional en imagen | `V1__*.sql`, `V2__*.sql`, `docs/database/diagrama-er.svg` | pendiente | `SELECT count(*)` por tabla principal ≥ 20; la imagen existe |
+| A11 | Scripts SQL de creación y datos (mín. 20 registros por entidad); relaciones e índices; diagrama relacional en imagen | `V1__schema.sql`, `V2__seed_data.sql`, `docs/database/diagrama-er.svg` | verificado | `SELECT count(*)` por tabla principal ≥ 20 comprobado en PostgreSQL 16; `diagrama-er.svg` generado |
 | A12 | Swagger con endpoints, ejemplos JSON y explicación de JWT | `OpenApiConfig`, `/swagger-ui.html`, `docs/api/openapi.json` | pendiente | Abro Swagger UI, uso Authorize y ejecuto un endpoint |
 | A13 | Gestión de proveedores/clientes, herramientas, reservas, pagos, reportes y estadísticas | Casos de uso por contexto; contexto `reporting` | pendiente | Cada reporte devuelve datos coherentes con el seed |
 | A14 | Pruebas de API con Postman y pruebas unitarias/de integración | `docs/postman/`, `src/test/` de cada módulo | pendiente | Corro la colección y `mvn clean verify` |
@@ -62,7 +62,7 @@ Control de cumplimiento del proyecto. Se actualiza en cada cierre de fase.
 | `JpaRepository` | `*JpaRepository.java` | pendiente | Pruebas de integración con Testcontainers |
 | `BigDecimal` para dinero | Value object `Money` en `domain` | pendiente | `grep -r "double\|Double"` sin resultados en dinero |
 | Configuración de conexión | `application-dev.yml`, `application-prod.yml` | pendiente | Variables de entorno, sin credenciales en código |
-| `ddl-auto` (validate con Flyway) | `application.yml` | pendiente | El valor es `validate` |
+| `ddl-auto` (validate con Flyway) | `application.yml`, `V1__schema.sql`, `V2__seed_data.sql` | verificado | `validate` verificado contra PostgreSQL 16; Flyway aplicó V1 y V2 |
 
 ### Excepciones
 
@@ -80,7 +80,7 @@ Control de cumplimiento del proyecto. Se actualiza en cada cierre de fase.
 |------|------------------|--------|---------------------|
 | Autenticación vs autorización | `SecurityConfig`, `@PreAuthorize` | pendiente | 401 sin token, 403 con rol incorrecto |
 | JWT (header, payload, signature) | `JwtTokenService` | pendiente | Decodifico un token y reviso sus claims |
-| `PasswordEncoder` (BCrypt) | `SecurityConfig` | pendiente | Las contraseñas del seed son hashes BCrypt |
+| `PasswordEncoder` (BCrypt) | `SecurityConfig`, `V2__seed_data.sql` | hecho | Las contraseñas del seed son hashes BCrypt ($2a$10$...) |
 | `UserDetails` y `UserDetailsService` | Clases de `identity` en infraestructura | pendiente | Login carga el usuario desde BD |
 | Authorities y roles | `ADMIN`, `PROVIDER`, `CLIENT` | pendiente | Cada rol accede solo a sus rutas |
 
