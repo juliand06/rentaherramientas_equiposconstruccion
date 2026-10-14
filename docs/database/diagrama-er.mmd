@@ -1,0 +1,280 @@
+erDiagram
+    %% =========================================================================
+    %% Diagrama Entidad-Relación (ER) — 22 Tablas (4FN)
+    %% Plataforma de Renta de Herramientas y Equipos de Construcción
+    %% =========================================================================
+
+    roles ||--o{ user_roles : "assigned_to"
+    users ||--o{ user_roles : "has"
+    users ||--o| client_profiles : "client_profile"
+    users ||--o| provider_profiles : "provider_profile"
+    users ||--o{ user_addresses : "addresses"
+    users ||--o{ user_phones : "phones"
+    users ||--o{ refresh_tokens : "sessions"
+
+    provider_profiles ||--o{ tools : "publishes"
+    categories ||--o{ tools : "categorizes"
+    tools ||--o{ tool_specifications : "technical_specs"
+    tools ||--o{ tool_images : "gallery"
+    tools ||--o{ tool_inventory_units : "physical_units"
+    tool_inventory_units ||--o{ maintenance_records : "maintenances"
+
+    client_profiles ||--o{ reservations : "books"
+    reservations ||--o{ reservation_items : "lines"
+    tool_inventory_units ||--o{ reservation_items : "assigned_unit"
+    reservations ||--o| deliveries : "dispatch"
+    users ||--o{ deliveries : "delivered_by"
+    reservations ||--o| returns : "reception"
+    users ||--o{ returns : "received_by"
+    reservations ||--o{ damage_reports : "incidents"
+    tool_inventory_units ||--o{ damage_reports : "damaged_unit"
+    users ||--o{ damage_reports : "reported_by"
+
+    reservations ||--o{ payments : "transactions"
+    reservations ||--o| invoices : "billed"
+    client_profiles ||--o{ invoices : "client_bill"
+    provider_profiles ||--o{ invoices : "provider_bill"
+    invoices ||--o{ invoice_items : "invoice_lines"
+
+    roles {
+        uuid id PK
+        varchar name UK
+        varchar description
+        timestamptz created_at
+    }
+
+    users {
+        uuid id PK
+        varchar email UK
+        varchar password_hash
+        varchar first_name
+        varchar last_name
+        boolean active
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    user_roles {
+        uuid user_id PK,FK
+        uuid role_id PK,FK
+        timestamptz assigned_at
+    }
+
+    client_profiles {
+        uuid id PK
+        uuid user_id FK,UK
+        varchar identification_type
+        varchar identification_number UK
+        varchar legal_name
+        numeric reputation_score
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    provider_profiles {
+        uuid id PK
+        uuid user_id FK,UK
+        varchar tax_id UK
+        varchar company_name
+        varchar commercial_registry UK
+        numeric commission_rate
+        numeric rating_average
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    user_addresses {
+        uuid id PK
+        uuid user_id FK
+        varchar department
+        varchar city
+        varchar address_line
+        varchar postal_code
+        boolean is_primary
+        timestamptz created_at
+    }
+
+    user_phones {
+        uuid id PK
+        uuid user_id FK
+        varchar country_code
+        varchar phone_number
+        varchar phone_type
+        boolean is_primary
+        timestamptz created_at
+    }
+
+    refresh_tokens {
+        uuid id PK
+        uuid user_id FK
+        varchar token_hash UK
+        timestamptz expires_at
+        boolean revoked
+        timestamptz revoked_at
+        timestamptz created_at
+    }
+
+    categories {
+        uuid id PK
+        varchar name UK
+        text description
+        boolean active
+        timestamptz created_at
+    }
+
+    tools {
+        uuid id PK
+        uuid provider_id FK
+        uuid category_id FK
+        varchar code UK
+        varchar name
+        text description
+        varchar brand
+        varchar model
+        numeric daily_rental_rate
+        numeric security_deposit_amount
+        numeric replacement_value
+        boolean active
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    tool_specifications {
+        uuid id PK
+        uuid tool_id FK
+        varchar spec_key
+        varchar spec_value
+        timestamptz created_at
+    }
+
+    tool_images {
+        uuid id PK
+        uuid tool_id FK
+        varchar image_url
+        boolean is_cover
+        int display_order
+        timestamptz created_at
+    }
+
+    tool_inventory_units {
+        uuid id PK
+        uuid tool_id FK
+        varchar serial_number UK
+        varchar status
+        varchar physical_condition
+        numeric operating_hours
+        date acquired_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    maintenance_records {
+        uuid id PK
+        uuid inventory_unit_id FK
+        varchar maintenance_type
+        numeric cost
+        varchar performed_by
+        text description
+        timestamptz performed_at
+        timestamptz created_at
+    }
+
+    reservations {
+        uuid id PK
+        uuid client_id FK
+        varchar reservation_number UK
+        varchar status
+        numeric total_rental_amount
+        numeric total_deposit_amount
+        timestamptz expires_at
+        varchar cancelled_reason
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    reservation_items {
+        uuid id PK
+        uuid reservation_id FK
+        uuid inventory_unit_id FK
+        date start_date
+        date end_date
+        numeric daily_price_applied
+        int rental_days
+        numeric subtotal
+        numeric deposit_applied
+        boolean is_active
+        timestamptz created_at
+    }
+
+    deliveries {
+        uuid id PK
+        uuid reservation_id FK,UK
+        uuid delivered_by_user_id FK
+        timestamptz delivered_at
+        text initial_condition_notes
+        boolean client_signature_ack
+        timestamptz created_at
+    }
+
+    returns {
+        uuid id PK
+        uuid reservation_id FK,UK
+        uuid received_by_user_id FK
+        timestamptz returned_at
+        int delay_days
+        numeric penalty_amount
+        text return_condition_notes
+        boolean deposit_refunded
+        timestamptz created_at
+    }
+
+    damage_reports {
+        uuid id PK
+        uuid reservation_id FK
+        uuid inventory_unit_id FK
+        uuid reported_by_user_id FK
+        varchar severity
+        numeric repair_estimated_cost
+        numeric charged_to_deposit
+        text description
+        boolean resolved
+        timestamptz created_at
+    }
+
+    payments {
+        uuid id PK
+        uuid reservation_id FK
+        varchar payment_reference UK
+        varchar payment_method
+        numeric amount
+        varchar status
+        varchar gateway_transaction_id
+        varchar gateway_response_code
+        timestamptz paid_at
+        timestamptz created_at
+    }
+
+    invoices {
+        uuid id PK
+        uuid reservation_id FK,UK
+        uuid client_id FK
+        uuid provider_id FK
+        varchar invoice_number UK
+        numeric subtotal
+        numeric tax_rate
+        numeric tax_amount
+        numeric total_amount
+        varchar pdf_path
+        timestamptz issued_at
+        timestamptz created_at
+    }
+
+    invoice_items {
+        uuid id PK
+        uuid invoice_id FK
+        varchar description
+        int quantity
+        numeric unit_price
+        numeric line_total
+        timestamptz created_at
+    }
