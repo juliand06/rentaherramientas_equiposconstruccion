@@ -1,0 +1,331 @@
+// =============================================================================
+// schema.dbml — Database Markup Language
+// Plataforma de Renta de Herramientas y Equipos de Construcción
+// 22 Tablas normalizadas en 4FN
+// =============================================================================
+
+Project rentatools {
+  database_type: 'PostgreSQL 16'
+  Note: '''
+    # Plataforma de Renta de Herramientas y Equipos de Construcción
+    Arquitectura Hexagonal + DDD
+    Normalización 4FN con 22 tablas.
+  '''
+}
+
+// -----------------------------------------------------------------------------
+// Bounded Context: Identity
+// -----------------------------------------------------------------------------
+
+Table roles {
+  id uuid [pk]
+  name varchar(30) [unique, not null, note: 'ADMIN, PROVIDER, CLIENT']
+  description varchar(255) [not null]
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table users {
+  id uuid [pk]
+  email varchar(150) [unique, not null]
+  password_hash varchar(255) [not null]
+  first_name varchar(100) [not null]
+  last_name varchar(100) [not null]
+  active boolean [not null, default: true]
+  created_at timestamptz [not null, default: `current_timestamp`]
+  updated_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table user_roles {
+  user_id uuid [not null]
+  role_id uuid [not null]
+  assigned_at timestamptz [not null, default: `current_timestamp`]
+
+  indexes {
+    (user_id, role_id) [pk]
+  }
+}
+
+Table client_profiles {
+  id uuid [pk]
+  user_id uuid [unique, not null]
+  identification_type varchar(20) [not null, note: 'CC, NIT, CE, PASSPORT']
+  identification_number varchar(30) [unique, not null]
+  legal_name varchar(150)
+  reputation_score numeric(3,2) [not null, default: 5.00]
+  created_at timestamptz [not null, default: `current_timestamp`]
+  updated_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table provider_profiles {
+  id uuid [pk]
+  user_id uuid [unique, not null]
+  tax_id varchar(30) [unique, not null]
+  company_name varchar(150) [not null]
+  commercial_registry varchar(50) [unique, not null]
+  commission_rate numeric(5,2) [not null, default: 10.00]
+  rating_average numeric(3,2) [not null, default: 5.00]
+  created_at timestamptz [not null, default: `current_timestamp`]
+  updated_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table user_addresses {
+  id uuid [pk]
+  user_id uuid [not null]
+  department varchar(100) [not null]
+  city varchar(100) [not null]
+  address_line varchar(255) [not null]
+  postal_code varchar(20)
+  is_primary boolean [not null, default: false]
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table user_phones {
+  id uuid [pk]
+  user_id uuid [not null]
+  country_code varchar(5) [not null, default: '+57']
+  phone_number varchar(20) [not null]
+  phone_type varchar(20) [not null, default: 'MOBILE', note: 'MOBILE, LANDLINE, WHATSAPP']
+  is_primary boolean [not null, default: false]
+  created_at timestamptz [not null, default: `current_timestamp`]
+
+  indexes {
+    (user_id, phone_number) [unique]
+  }
+}
+
+Table refresh_tokens {
+  id uuid [pk]
+  user_id uuid [not null]
+  token_hash varchar(255) [unique, not null]
+  expires_at timestamptz [not null]
+  revoked boolean [not null, default: false]
+  revoked_at timestamptz
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+// -----------------------------------------------------------------------------
+// Bounded Context: Catalog
+// -----------------------------------------------------------------------------
+
+Table categories {
+  id uuid [pk]
+  name varchar(80) [unique, not null]
+  description text
+  active boolean [not null, default: true]
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table tools {
+  id uuid [pk]
+  provider_id uuid [not null]
+  category_id uuid [not null]
+  code varchar(50) [unique, not null]
+  name varchar(120) [not null]
+  description text [not null]
+  brand varchar(60) [not null]
+  model varchar(60) [not null]
+  daily_rental_rate numeric(12,2) [not null]
+  security_deposit_amount numeric(12,2) [not null, default: 0.00]
+  replacement_value numeric(12,2) [not null]
+  active boolean [not null, default: true]
+  created_at timestamptz [not null, default: `current_timestamp`]
+  updated_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table tool_specifications {
+  id uuid [pk]
+  tool_id uuid [not null]
+  spec_key varchar(50) [not null]
+  spec_value varchar(100) [not null]
+  created_at timestamptz [not null, default: `current_timestamp`]
+
+  indexes {
+    (tool_id, spec_key) [unique]
+  }
+}
+
+Table tool_images {
+  id uuid [pk]
+  tool_id uuid [not null]
+  image_url varchar(500) [not null]
+  is_cover boolean [not null, default: false]
+  display_order int [not null, default: 0]
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table tool_inventory_units {
+  id uuid [pk]
+  tool_id uuid [not null]
+  serial_number varchar(80) [unique, not null]
+  status varchar(25) [not null, default: 'AVAILABLE', note: 'AVAILABLE, RESERVED, RENTED, IN_MAINTENANCE, DAMAGED, RETIRED']
+  physical_condition varchar(30) [not null, default: 'EXCELLENT', note: 'EXCELLENT, GOOD, FAIR, DAMAGED']
+  operating_hours numeric(8,2) [not null, default: 0.00]
+  acquired_at date [not null]
+  created_at timestamptz [not null, default: `current_timestamp`]
+  updated_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table maintenance_records {
+  id uuid [pk]
+  inventory_unit_id uuid [not null]
+  maintenance_type varchar(20) [not null, note: 'PREVENTIVE, CORRECTIVE, CALIBRATION']
+  cost numeric(12,2) [not null, default: 0.00]
+  performed_by varchar(120) [not null]
+  description text [not null]
+  performed_at timestamptz [not null]
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+// -----------------------------------------------------------------------------
+// Bounded Context: Rental
+// -----------------------------------------------------------------------------
+
+Table reservations {
+  id uuid [pk]
+  client_id uuid [not null]
+  reservation_number varchar(50) [unique, not null]
+  status varchar(25) [not null, default: 'PENDING', note: 'PENDING, CONFIRMED, DELIVERED, RETURNED, CANCELLED, EXPIRED']
+  total_rental_amount numeric(12,2) [not null, default: 0.00]
+  total_deposit_amount numeric(12,2) [not null, default: 0.00]
+  expires_at timestamptz [not null]
+  cancelled_reason varchar(255)
+  created_at timestamptz [not null, default: `current_timestamp`]
+  updated_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table reservation_items {
+  id uuid [pk]
+  reservation_id uuid [not null]
+  inventory_unit_id uuid [not null]
+  start_date date [not null]
+  end_date date [not null]
+  daily_price_applied numeric(12,2) [not null]
+  rental_days int [not null]
+  subtotal numeric(12,2) [not null]
+  deposit_applied numeric(12,2) [not null, default: 0.00]
+  is_active boolean [not null, default: true]
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table deliveries {
+  id uuid [pk]
+  reservation_id uuid [unique, not null]
+  delivered_by_user_id uuid [not null]
+  delivered_at timestamptz [not null, default: `current_timestamp`]
+  initial_condition_notes text [not null]
+  client_signature_ack boolean [not null, default: true]
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table returns {
+  id uuid [pk]
+  reservation_id uuid [unique, not null]
+  received_by_user_id uuid [not null]
+  returned_at timestamptz [not null, default: `current_timestamp`]
+  delay_days int [not null, default: 0]
+  penalty_amount numeric(12,2) [not null, default: 0.00]
+  return_condition_notes text [not null]
+  deposit_refunded boolean [not null, default: false]
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table damage_reports {
+  id uuid [pk]
+  reservation_id uuid [not null]
+  inventory_unit_id uuid [not null]
+  reported_by_user_id uuid [not null]
+  severity varchar(20) [not null, note: 'LOW, MEDIUM, HIGH, TOTAL_LOSS']
+  repair_estimated_cost numeric(12,2) [not null]
+  charged_to_deposit numeric(12,2) [not null, default: 0.00]
+  description text [not null]
+  resolved boolean [not null, default: false]
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+// -----------------------------------------------------------------------------
+// Bounded Context: Billing
+// -----------------------------------------------------------------------------
+
+Table payments {
+  id uuid [pk]
+  reservation_id uuid [not null]
+  payment_reference varchar(60) [unique, not null]
+  payment_method varchar(30) [not null, note: 'CREDIT_CARD, DEBIT_CARD, PSE, BANK_TRANSFER, SIMULATED_GATEWAY']
+  amount numeric(12,2) [not null]
+  status varchar(25) [not null, default: 'PENDING', note: 'PENDING, COMPLETED, FAILED, REFUNDED']
+  gateway_transaction_id varchar(100)
+  gateway_response_code varchar(50)
+  paid_at timestamptz
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table invoices {
+  id uuid [pk]
+  reservation_id uuid [unique, not null]
+  client_id uuid [not null]
+  provider_id uuid [not null]
+  invoice_number varchar(50) [unique, not null]
+  subtotal numeric(12,2) [not null]
+  tax_rate numeric(5,2) [not null, default: 19.00]
+  tax_amount numeric(12,2) [not null]
+  total_amount numeric(12,2) [not null]
+  pdf_path varchar(300)
+  issued_at timestamptz [not null, default: `current_timestamp`]
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+Table invoice_items {
+  id uuid [pk]
+  invoice_id uuid [not null]
+  description varchar(255) [not null]
+  quantity int [not null, default: 1]
+  unit_price numeric(12,2) [not null]
+  line_total numeric(12,2) [not null]
+  created_at timestamptz [not null, default: `current_timestamp`]
+}
+
+// -----------------------------------------------------------------------------
+// Relationships (Foreign Keys)
+// -----------------------------------------------------------------------------
+
+Ref: user_roles.user_id > users.id [delete: cascade]
+Ref: user_roles.role_id > roles.id [delete: restrict]
+
+Ref: client_profiles.user_id - users.id [delete: cascade]
+Ref: provider_profiles.user_id - users.id [delete: cascade]
+
+Ref: user_addresses.user_id > users.id [delete: cascade]
+Ref: user_phones.user_id > users.id [delete: cascade]
+Ref: refresh_tokens.user_id > users.id [delete: cascade]
+
+Ref: tools.provider_id > provider_profiles.id [delete: restrict]
+Ref: tools.category_id > categories.id [delete: restrict]
+
+Ref: tool_specifications.tool_id > tools.id [delete: cascade]
+Ref: tool_images.tool_id > tools.id [delete: cascade]
+
+Ref: tool_inventory_units.tool_id > tools.id [delete: restrict]
+Ref: maintenance_records.inventory_unit_id > tool_inventory_units.id [delete: restrict]
+
+Ref: reservations.client_id > client_profiles.id [delete: restrict]
+
+Ref: reservation_items.reservation_id > reservations.id [delete: cascade]
+Ref: reservation_items.inventory_unit_id > tool_inventory_units.id [delete: restrict]
+
+Ref: deliveries.reservation_id - reservations.id [delete: restrict]
+Ref: deliveries.delivered_by_user_id > users.id [delete: restrict]
+
+Ref: returns.reservation_id - reservations.id [delete: restrict]
+Ref: returns.received_by_user_id > users.id [delete: restrict]
+
+Ref: damage_reports.reservation_id > reservations.id [delete: restrict]
+Ref: damage_reports.inventory_unit_id > tool_inventory_units.id [delete: restrict]
+Ref: damage_reports.reported_by_user_id > users.id [delete: restrict]
+
+Ref: payments.reservation_id > reservations.id [delete: restrict]
+
+Ref: invoices.reservation_id - reservations.id [delete: restrict]
+Ref: invoices.client_id > client_profiles.id [delete: restrict]
+Ref: invoices.provider_id > provider_profiles.id [delete: restrict]
+
+Ref: invoice_items.invoice_id > invoices.id [delete: cascade]
