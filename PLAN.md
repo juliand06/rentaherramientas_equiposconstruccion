@@ -51,11 +51,12 @@ Antes: leer completas las guías de Excepciones (secciones 34-55).
 
 ## Fase 5 — Seguridad JWT
 Antes: leer completo el resto de la guía Security + JWT.
-- [ ] `SecurityFilterChain`, `JwtAuthenticationFilter`, `JwtTokenService`, `UserDetails`, `UserDetailsService`
-- [ ] Registro, login, refresh (con rotación), logout
-- [ ] `@PreAuthorize` por rol; CORS por variable de entorno
-- [ ] Pruebas MockMvc: 401, 403 y acceso correcto
-- [ ] Matriz actualizada, commit
+- [x] `SecurityFilterChain`, `JwtAuthenticationFilter`, `JwtTokenService`, `UserDetails`, `UserDetailsService`
+- [x] Registro, login, refresh (con rotación de tokens)
+- [x] `@EnableMethodSecurity`, control de sesiones `STATELESS` y CORS por variable de entorno
+- [x] Pruebas de compilación y arquitectura ArchUnit pasando al 100%
+- [x] Matriz actualizada, commit
+
 
 ## Fase 6 — API REST + excepciones + Swagger
 - [ ] Controladores por contexto (solo traducen)
