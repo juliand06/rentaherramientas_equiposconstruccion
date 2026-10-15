@@ -18,12 +18,15 @@ class UserAggregateTest {
         User user = User.register(
                 Email.of("cliente@obra.com"),
                 "$2a$12$hashedpassword",
-                "Juan Pérez",
+                "Juan",
+                "Pérez",
                 User.RoleName.CLIENT,
                 now
         );
 
         assertNotNull(user.getId());
+        assertEquals("Juan", user.getFirstName());
+        assertEquals("Pérez", user.getLastName());
         assertEquals("Juan Pérez", user.getFullName());
         assertTrue(user.isActive());
         assertTrue(user.getRoles().contains(User.RoleName.CLIENT));
@@ -35,7 +38,8 @@ class UserAggregateTest {
         User user = User.register(
                 Email.of("proveedor@rentatools.com"),
                 "$2a$12$hashedpassword",
-                "Ferretería Central",
+                "Ferretería",
+                "Central",
                 User.RoleName.PROVIDER,
                 now
         );

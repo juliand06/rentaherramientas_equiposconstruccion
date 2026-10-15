@@ -13,7 +13,7 @@ import java.util.Set;
 
 /**
  * Agregado User (Identidad y Accesos).
- * Administra credenciales, estados de cuenta y roles asignados (ADMIN, PROVIDER, CLIENT).
+ * Refleja fielmente la tabla {@code users} de PostgreSQL (firstName, lastName, email, active).
  */
 public class User extends AggregateRoot<UserId> {
 
@@ -25,7 +25,8 @@ public class User extends AggregateRoot<UserId> {
 
     private Email email;
     private String passwordHash;
-    private String fullName;
+    private String firstName;
+    private String lastName;
     private boolean active;
     private final Set<RoleName> roles = new HashSet<>();
     private final Instant createdAt;
@@ -35,7 +36,8 @@ public class User extends AggregateRoot<UserId> {
             UserId id,
             Email email,
             String passwordHash,
-            String fullName,
+            String firstName,
+            String lastName,
             boolean active,
             Set<RoleName> roles,
             Instant createdAt,
@@ -44,7 +46,8 @@ public class User extends AggregateRoot<UserId> {
         super(id);
         this.email = Objects.requireNonNull(email, "El correo electrónico no puede ser nulo");
         this.passwordHash = validateNonBlank(passwordHash, "El hash de contraseña");
-        this.fullName = validateNonBlank(fullName, "El nombre completo");
+        this.firstName = validateNonBlank(firstName, "El nombre");
+        this.lastName = validateNonBlank(lastName, "El apellido");
         this.active = active;
         if (roles == null || roles.isEmpty()) {
             throw new InvalidUserDataException("El usuario debe tener asignado al menos un rol");
@@ -57,26 +60,28 @@ public class User extends AggregateRoot<UserId> {
     public static User register(
             Email email,
             String passwordHash,
-            String fullName,
+            String firstName,
+            String lastName,
             RoleName primaryRole,
             Instant now
     ) {
         UserId userId = UserId.generate();
         Set<RoleName> initialRoles = Set.of(Objects.requireNonNull(primaryRole, "El rol inicial no puede ser nulo"));
-        return new User(userId, email, passwordHash, fullName, true, initialRoles, now, now);
+        return new User(userId, email, passwordHash, firstName, lastName, true, initialRoles, now, now);
     }
 
     public static User restore(
             UserId id,
             Email email,
             String passwordHash,
-            String fullName,
+            String firstName,
+            String lastName,
             boolean active,
             Set<RoleName> roles,
             Instant createdAt,
             Instant updatedAt
     ) {
-        return new User(id, email, passwordHash, fullName, active, roles, createdAt, updatedAt);
+        return new User(id, email, passwordHash, firstName, lastName, active, roles, createdAt, updatedAt);
     }
 
     public void addRole(RoleName role, Instant now) {
@@ -104,8 +109,9 @@ public class User extends AggregateRoot<UserId> {
         this.updatedAt = Objects.requireNonNull(now);
     }
 
-    public void updateProfile(String fullName, Instant now) {
-        this.fullName = validateNonBlank(fullName, "El nombre completo");
+    public void updateProfile(String firstName, String lastName, Instant now) {
+        this.firstName = validateNonBlank(firstName, "El nombre");
+        this.lastName = validateNonBlank(lastName, "El apellido");
         this.updatedAt = Objects.requireNonNull(now);
     }
 
@@ -122,8 +128,16 @@ public class User extends AggregateRoot<UserId> {
         return passwordHash;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
     public String getFullName() {
-        return fullName;
+        return firstName + " " + lastName;
     }
 
     public boolean isActive() {
