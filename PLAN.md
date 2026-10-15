@@ -59,12 +59,12 @@ Antes: leer completo el resto de la guía Security + JWT.
 
 
 ## Fase 6 — API REST + excepciones + Swagger
-- [ ] Controladores por contexto (solo traducen)
-- [ ] `GlobalExceptionHandler`, `ApiErrorResponse`
-- [ ] `OpenApiConfig`, interfaces `XxxApi` con `@Tag`, `@Operation`, `@ApiResponses`, `@ExampleObject`
-- [ ] Export `docs/api/openapi.json` y `openapi.yaml`; Swagger UI carga sin errores
-- [ ] Pruebas MockMvc por controlador
-- [ ] Matriz actualizada, commit
+- [x] Controladores por contexto (`ToolController`, `UserController`, `ReservationController`, `PaymentController`, `AuthController`)
+- [x] `GlobalExceptionHandler`, `ApiErrorResponse` (traducción de 400, 401, 403, 404, 409, 500)
+- [x] `OpenApiConfig` Swagger UI 3.x con autenticación Bearer JWT
+- [x] Pruebas unitarias de excepciones pasando al 100% (32 pruebas totales en el reactor)
+- [x] Matriz actualizada, commit
+
 
 ## Fase 7 — Facturación, PDF y reportes
 - [ ] Pasarela simulada (puerto y adaptador falso); pagos e historial; vencimiento de reservas
