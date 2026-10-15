@@ -26,7 +26,7 @@ Control de cumplimiento del proyecto. Se actualiza en cada cierre de fase.
 | A11 | Scripts SQL de creación y datos (mín. 20 registros por entidad); relaciones e índices; diagrama relacional en imagen | `V1__schema.sql`, `V2__seed_data.sql`, `docs/database/diagrama-er.svg` | verificado | `SELECT count(*)` por tabla principal ≥ 20 comprobado en PostgreSQL 16; `diagrama-er.svg` generado |
 | A12 | Swagger con endpoints, ejemplos JSON y explicación de JWT | `OpenApiConfig`, `/swagger-ui.html`, `docs/api/openapi.json` | pendiente | Abro Swagger UI, uso Authorize y ejecuto un endpoint |
 | A13 | Gestión de proveedores/clientes, herramientas, reservas, pagos, reportes y estadísticas | Casos de uso por contexto; contexto `reporting` | pendiente | Cada reporte devuelve datos coherentes con el seed |
-| A14 | Pruebas de API con Postman y pruebas unitarias/de integración | `docs/postman/`, `src/test/` de cada módulo | pendiente | Corro la colección y `mvn clean verify` |
+| A14 | Pruebas de API con Postman y pruebas unitarias/de integración | `docs/postman/`, `src/test/` de cada módulo | verificado | 38 pruebas pasando en verde con `mvn clean verify` (ArchUnit, unitarias y end-to-end MockMvc); colección y ambiente de Postman en `docs/postman/` |
 | A15 | Despliegue (Docker y/o Tomcat) | `Dockerfile`, `docker-compose.yml`, WAR | pendiente | `docker compose up` levanta todo y los healthchecks pasan; el WAR corre en Tomcat |
 
 ---

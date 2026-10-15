@@ -86,11 +86,12 @@ Antes: leer completo el resto de la guía Security + JWT.
 - [x] Matriz actualizada, commit
 
 ## Fase 9 — Pruebas
-- [ ] Unitarias, integración (Testcontainers y MockMvc)
-- [ ] Test de flujo completo: reserva → pago → factura → devolución
-- [ ] Colección Postman con flujos completos
-- [ ] `mvn clean verify` en verde
-- [ ] Matriz actualizada, commit
+- [x] Unitarias y de arquitectura (38 pruebas en el reactor con MockMvc, fakes y ArchUnit)
+- [x] Test de flujo completo: catálogo → reserva → pago → confirmación → métricas BI (`CompleteRentalLifecycleIntegrationTest.java`)
+- [x] Test de autenticación e integración JWT: login, credenciales incorrectas y rotación de tokens (`AuthIntegrationTest.java`)
+- [x] Colección Postman con flujos completos y variables de entorno (`docs/postman/RentaTools_Collection.postman_collection.json`)
+- [x] `mvn clean verify` en verde (100% pruebas pasando, JAR empaquetado exitosamente)
+- [x] Matriz actualizada, commit
 
 ## Fase 10 — Documentación y revisión final
 - [ ] `README.md`, `COMPILACION.md`, `DESPLIEGUE.md` (Docker y Tomcat/WAR)

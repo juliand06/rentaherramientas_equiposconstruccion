@@ -1,0 +1,380 @@
+{
+  "info": {
+    "_postman_id": "7b8893a1-26c3-4f91-825f-rentatools-collection",
+    "name": "RentaTools PRO — API REST Multi-Módulo (Fases 0 a 9)",
+    "description": "Colección completa de pruebas para RentaTools PRO. Cubre autenticación JWT, gestión de usuarios, catálogo de maquinaria, reservas, pasarela de pagos simulada y reportes ejecutivos BI.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Autenticación",
+      "item": [
+        {
+          "name": "1.1 Login Cliente (Obtener Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Token JWT recibido correctamente\", function () {",
+                  "    pm.expect(jsonData.accessToken).to.not.be.empty;",
+                  "});",
+                  "if (jsonData.accessToken) {",
+                  "    pm.environment.set(\"token\", jsonData.accessToken);",
+                  "    pm.environment.set(\"refreshToken\", jsonData.refreshToken);",
+                  "    console.log(\"Token JWT guardado en el ambiente.\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente@rentatools.com\",\n  \"password\": \"Password123*\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "1.2 Login Proveedor",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"proveedor@rentatools.com\",\n  \"password\": \"Password123*\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "1.3 Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@rentatools.com\",\n  \"password\": \"Password123*\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "1.4 Rotar Token (Refresh Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Usuarios",
+      "item": [
+        {
+          "name": "2.1 Registrar Nuevo Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo.contratista@obra.com\",\n  \"password\": \"Segura123*\",\n  \"firstName\": \"Carlos\",\n  \"lastName\": \"Mendoza\",\n  \"role\": \"CLIENT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            }
+          }
+        },
+        {
+          "name": "2.2 Consultar Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{clientUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{clientUserId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Catálogo de Maquinaria",
+      "item": [
+        {
+          "name": "3.1 Listar Todas las Maquinarias",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 200\", function () { pm.response.to.have.status(200); });",
+                  "var list = pm.response.json();",
+                  "if (list.length > 0) {",
+                  "    pm.environment.set(\"toolId\", list[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tools",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tools"]
+            }
+          }
+        },
+        {
+          "name": "3.2 Listar por Categoría",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tools?categoryId={{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tools"],
+              "query": [
+                { "key": "categoryId", "value": "{{categoryId}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.3 Consultar Maquinaria por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tools/{{toolId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tools", "{{toolId}}"]
+            }
+          }
+        },
+        {
+          "name": "3.4 Registrar Nueva Maquinaria (Proveedor)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"providerId\": \"{{providerUserId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"code\": \"CAT-EXC-320D\",\n  \"name\": \"Excavadora Hidráulica sobre Orugas CAT 320D\",\n  \"description\": \"Excavadora pesada para movimiento de tierras y excavaciones profundas\",\n  \"brand\": \"Caterpillar\",\n  \"model\": \"320D\",\n  \"dailyRentalRate\": 450000.00,\n  \"securityDeposit\": 1500000.00,\n  \"replacementValue\": 180000000.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tools",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tools"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Reservas y Alquiler",
+      "item": [
+        {
+          "name": "4.1 Crear Solicitud de Reserva",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () { pm.response.to.have.status(201); });",
+                  "var data = pm.response.json();",
+                  "if (data.id) {",
+                  "    pm.environment.set(\"reservationId\", data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientUserId}}\",\n  \"toolId\": \"{{toolId}}\",\n  \"startDate\": \"2026-10-20\",\n  \"endDate\": \"2026-10-25\",\n  \"dailyRate\": 450000.00,\n  \"depositAmount\": 1500000.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reservations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reservations"]
+            }
+          }
+        },
+        {
+          "name": "4.2 Consultar Reserva por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservations/{{reservationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reservations", "{{reservationId}}"]
+            }
+          }
+        },
+        {
+          "name": "4.3 Confirmar Reserva (Paso a Confirmada)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reservations/{{reservationId}}/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reservations", "{{reservationId}}", "confirm"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Pagos y Facturación",
+      "item": [
+        {
+          "name": "5.1 Procesar Pago de Depósito",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 201\", function () { pm.response.to.have.status(201); });",
+                  "var data = pm.response.json();",
+                  "if (data.id) {",
+                  "    pm.environment.set(\"paymentId\", data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reservationId\": \"{{reservationId}}\",\n  \"paymentMethod\": \"CREDIT_CARD\",\n  \"amount\": 3750000.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"]
+            }
+          }
+        },
+        {
+          "name": "5.2 Consultar Pago por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{paymentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Reportes y Métricas BI",
+      "item": [
+        {
+          "name": "6.1 Consultar Métricas del Sistema (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/metrics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "metrics"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Documentación OpenAPI",
+      "item": [
+        {
+          "name": "7.1 Obtener OpenAPI JSON (Swagger)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v3/api-docs",
+              "host": ["{{baseUrl}}"],
+              "path": ["v3", "api-docs"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
