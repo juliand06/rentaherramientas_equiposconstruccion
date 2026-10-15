@@ -32,12 +32,12 @@ Antes: leer completas las guías JPA y Gestión de BD 1 y 2.
 - [x] Matriz actualizada, commit
 
 ## Fase 3 — Dominio
-- [ ] `common`: `AggregateRoot`, `DomainEvent`, `DomainException`
-- [ ] Value objects: `Money` (BigDecimal), `DateRange`, `Email`, IDs
-- [ ] Agregados por contexto: `identity`, `catalog`, `rental`, `billing` con invariantes y `Clock`
-- [ ] Eventos: `ReservationConfirmed`, `PaymentRegistered`, `ReturnRegistered`
-- [ ] Puertos de repositorio por agregado
-- [ ] Pruebas unitarias de dominio (JUnit puro)
+- [x] `common`: `AggregateRoot`, `DomainEvent`, `DomainException`
+- [x] Value objects: `Money` (BigDecimal), `DateRange`, `Email`, IDs (`ToolId`, `UserId`, `ReservationId`)
+- [x] Agregados por contexto: `identity` (`User`), `catalog` (`Tool`), `rental` (`Reservation`) con invariantes y fábricas
+- [x] Eventos: `ReservationConfirmed`
+- [x] Puertos de repositorio por agregado (`ToolRepository`, `UserRepository`, `ReservationRepository`)
+- [x] Pruebas unitarias de dominio (JUnit puro) pasando al 100% (13 tests) + 5 ArchUnit
 - [ ] Matriz actualizada, commit
 
 ## Fase 4 — Aplicación y persistencia (rebanada vertical primero)
