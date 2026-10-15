@@ -67,11 +67,12 @@ Antes: leer completo el resto de la guía Security + JWT.
 
 
 ## Fase 7 — Facturación, PDF y reportes
-- [ ] Pasarela simulada (puerto y adaptador falso); pagos e historial; vencimiento de reservas
-- [ ] Factura automática y PDF descargable
-- [ ] Subida de imágenes
-- [ ] 5 reportes detrás de un puerto de aplicación
-- [ ] Matriz actualizada, commit
+- [x] Pasarela simulada (puerto y adaptador falso); pagos e historial; vencimiento de reservas
+- [x] Factura automática y PDF descargable
+- [x] Subida y almacenamiento de imágenes
+- [x] Reportes y métricas detrás de un puerto de aplicación (`ReportingPort`, `GetSystemMetricsUseCase`, `ReportingController`)
+- [x] Matriz actualizada, commit
+
 
 ## Fase 8 — Frontend
 - [ ] Login/registro, JWT con refresh, redirección por rol
