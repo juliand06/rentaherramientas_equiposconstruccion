@@ -46,6 +46,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Rutas públicas de Swagger / OpenAPI
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // Recursos estáticos del frontend
+                        .requestMatchers("/", "/index.html", "/*.css", "/*.js", "/*.ico", "/*.png", "/*.svg", "/assets/**").permitAll()
                         // Rutas públicas de Autenticación
                         .requestMatchers("/api/auth/**").permitAll()
                         // Catálogo público para visualización

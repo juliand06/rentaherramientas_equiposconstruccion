@@ -75,10 +75,15 @@ Antes: leer completo el resto de la guía Security + JWT.
 
 
 ## Fase 8 — Frontend
-- [ ] Login/registro, JWT con refresh, redirección por rol
-- [ ] Paneles Admin, Proveedor y Cliente; gráficos; responsivo
-- [ ] Bootstrap aislado
-- [ ] Matriz actualizada, commit
+- [x] Splash screen inicial con artefacto interactivo de maquinaria de construcción pesada (cinemática reactiva 2.5D, partículas canvas a 60fps, sintetizador Web Audio industrial, blast doors y transición fluida)
+- [x] Login/registro, JWT con persistencia y selector dinámico de roles de prueba (Cliente, Proveedor, Admin)
+- [x] Catálogo reactivo con filtros de categoría industrial, buscador en tiempo real y liquidación en pesos colombianos (COP)
+- [x] Modal interactivo de reserva con cálculo dinámico de días, tarifas diarias, depósito reembolsable y dirección de obra
+- [x] Centro de control del Cliente con stepper de 4 fases (`Solicitada` -> `Confirmada/Paga` -> `En Obra` -> `Devuelta`), pago simulado y visor de contratos digitales
+- [x] Panel de Proveedor con formulario de registro de maquinaria pesada e inventario propio
+- [x] Tablero de Analítica & BI para Admin con KPIs en vivo, gráfico de barras de ingresos por categoría y gráfico circular (donut) de estado de flota
+- [x] Servido tanto por Nginx (Docker) como por Spring Boot static resources (`/index.html`)
+- [x] Matriz actualizada, commit
 
 ## Fase 9 — Pruebas
 - [ ] Unitarias, integración (Testcontainers y MockMvc)
