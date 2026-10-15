@@ -1,16 +1,15 @@
 package com.rentatools.domain.catalog.port.repository;
 
 import com.rentatools.domain.catalog.model.aggregate.Tool;
+import com.rentatools.domain.catalog.model.valueobject.CategoryId;
 import com.rentatools.domain.catalog.model.valueobject.ToolId;
-import com.rentatools.domain.identity.model.valueobject.UserId;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
- * Puerto de salida del dominio para la persistencia del agregado Tool.
- * Solo define operaciones del negocio, sin dependencias de frameworks ni JPA.
+ * Puerto de salida del dominio para persistir el agregado {@link Tool}.
+ * Sin dependencias de frameworks ni de JPA.
  */
 public interface ToolRepository {
 
@@ -18,11 +17,9 @@ public interface ToolRepository {
 
     Optional<Tool> findById(ToolId id);
 
-    List<Tool> findAllAvailable();
+    List<Tool> findAllActive();
 
-    List<Tool> findByCategoryId(UUID categoryId);
+    List<Tool> findActiveByCategoryId(CategoryId categoryId);
 
-    List<Tool> findByProviderId(UserId providerId);
-
-    boolean existsById(ToolId id);
+    boolean existsByCode(String code);
 }
