@@ -42,11 +42,12 @@ Antes: leer completas las guías JPA y Gestión de BD 1 y 2.
 
 ## Fase 4 — Aplicación y persistencia (rebanada vertical primero)
 Antes: leer completas las guías de Excepciones (secciones 34-55).
-- [ ] **4a — Rebanada vertical `catalog` (herramientas)** de punta a punta: use cases, entidad, mapper, adaptador, BeansConfig, controlador mínimo, pruebas. **Te la muestro y espero tu visto bueno**
-- [ ] 4b — Replicar el patrón en `identity`, `rental`, `billing`
-- [ ] `DomainEventPublisher` y ejecutor transaccional
-- [ ] Pruebas de casos de uso con fakes; integración de repositorios con Testcontainers
-- [ ] Matriz actualizada, commit
+- [x] **4a — Rebanada vertical `catalog` (herramientas)** de punta a punta: use cases, entidad, mapper, adaptador, BeansConfig, controlador mínimo, pruebas.
+- [x] 4b — Replicar el patrón en `identity`, `rental`, `billing` (casos de uso, entidades JPA, mappers, repositorios y controladores REST)
+- [x] `DomainEventPublisher` y ejecutor desacoplado con Spring Events
+- [x] Pruebas de casos de uso con fakes y validación ArchUnit pasando al 100% (29 tests totales)
+- [x] Matriz actualizada, commits realizados por contexto
+
 
 ## Fase 5 — Seguridad JWT
 Antes: leer completo el resto de la guía Security + JWT.
