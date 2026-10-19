@@ -38,7 +38,7 @@ Antes: leer completas las guías JPA y Gestión de BD 1 y 2.
 - [x] Eventos: `ReservationConfirmed`
 - [x] Puertos de repositorio por agregado (`ToolRepository`, `UserRepository`, `ReservationRepository`)
 - [x] Pruebas unitarias de dominio (JUnit puro) pasando al 100% (13 tests) + 5 ArchUnit
-- [ ] Matriz actualizada, commit
+- [x] Matriz actualizada, commit
 
 ## Fase 4 — Aplicación y persistencia (rebanada vertical primero)
 Antes: leer completas las guías de Excepciones (secciones 34-55).
