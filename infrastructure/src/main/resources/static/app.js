@@ -138,10 +138,10 @@
             subtotal: 1440000,
             deposit: 900000,
             total: 2340000,
-            siteAddress: 'Calle 140 # 19-30, Proyecto Torre Bambú, Bogotá',
+            siteAddress: 'Autopista Floridablanca Km 4, Condominio Mensulí, Floridablanca, Santander',
             status: 'DELIVERED', // REQUESTED, CONFIRMED, DELIVERED, RETURNED
             stepIndex: 3,
-            contractCode: 'RT-CTR-2026-901'
+            contractCode: 'RT-SAN-2026-901'
         }
     ];
 
@@ -439,6 +439,8 @@
         const end = resEndDate.value;
         const address = document.getElementById('res-project-address').value;
         const notes = document.getElementById('res-notes').value;
+        const zoneEl = document.getElementById('res-project-zone');
+        const zoneName = zoneEl ? zoneEl.options[zoneEl.selectedIndex].text : 'Bucaramanga AM';
 
         const startD = new Date(start);
         const endD = new Date(end);
@@ -765,14 +767,96 @@
         if (kpiTools) kpiTools.textContent = `${state.metrics.totalTools} Equipos`;
         if (kpiOcc) kpiOcc.textContent = `${state.metrics.occupancyRate}%`;
 
-        // Gráfico de Barras por Categoría
+        // 1. Gráfico de Barras Estructurado y Visible
         const barContainer = document.getElementById('bar-chart-container');
         if (barContainer) {
-            barContainer.innerHTML = state.metrics.categoriesRevenue.map(c => `
-                <div class="chart-bar-col">
-                    <span class="chart-bar-val">${(c.amount / 1000000).toFixed(1)}M</span>
-                    <div class="chart-bar-fill" style="height: ${c.pct}%;"></div>
-                    <span class="chart-bar-label">${c.category}</span>
+            const maxAmount = Math.max(...state.metrics.categoriesRevenue.map(c => c.amount));
+            barContainer.innerHTML = `
+                <div class="bar-chart-visual">
+                    <div class="bar-chart-gridlines">
+                        <div class="bar-gridline"><span class="grid-val">$20M</span></div>
+                        <div class="bar-gridline"><span class="grid-val">$15M</span></div>
+                        <div class="bar-gridline"><span class="grid-val">$10M</span></div>
+                        <div class="bar-gridline"><span class="grid-val">$5M</span></div>
+                        <div class="bar-gridline"><span class="grid-val">$0</span></div>
+                    </div>
+                    <div class="bar-chart-columns">
+                        ${state.metrics.categoriesRevenue.map(c => {
+                            const heightPct = Math.round((c.amount / maxAmount) * 88);
+                            return `
+                                <div class="bar-column-item" title="${c.category}: ${currencyFormatter.format(c.amount)} COP">
+                                    <div class="bar-column-val-tag">${(c.amount / 1000000).toFixed(1)}M</div>
+                                    <div class="bar-column-track">
+                                        <div class="bar-column-fill" style="height: ${heightPct}%;"></div>
+                                    </div>
+                                    <span class="bar-column-label">${c.category}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2. Gráfico Donut de Flota en Santander con Cálculo Dinámico
+        const total = 32;
+        const available = 25;
+        const rented = 5;
+        const maint = 2;
+
+        const pctAvail = Math.round((available / total) * 100);
+        const pctRent = Math.round((rented / total) * 100);
+        const pctMaint = Math.round((maint / total) * 100);
+
+        const elPctAvail = document.getElementById('pct-available');
+        const elPctRent = document.getElementById('pct-rented');
+        const elPctMaint = document.getElementById('pct-maint');
+        if (elPctAvail) elPctAvail.textContent = `${pctAvail}% (${available} eq)`;
+        if (elPctRent) elPctRent.textContent = `${pctRent}% (${rented} eq)`;
+        if (elPctMaint) elPctMaint.textContent = `${pctMaint}% (${maint} eq)`;
+
+        // Circunferencia para radio r=65: 2 * PI * 65 = 408.4
+        const circumference = 408.4;
+        const strokeAvail = (pctAvail / 100) * circumference;
+        const strokeRent = (pctRent / 100) * circumference;
+        const strokeMaint = (pctMaint / 100) * circumference;
+
+        const segAvail = document.getElementById('donut-seg-available');
+        const segRent = document.getElementById('donut-seg-rented');
+        const segMaint = document.getElementById('donut-seg-maint');
+
+        if (segAvail) {
+            segAvail.style.strokeDasharray = `${strokeAvail} ${circumference}`;
+            segAvail.style.strokeDashoffset = '0';
+        }
+        if (segRent) {
+            segRent.style.strokeDasharray = `${strokeRent} ${circumference}`;
+            segRent.style.strokeDashoffset = `-${strokeAvail}`;
+        }
+        if (segMaint) {
+            segMaint.style.strokeDasharray = `${strokeMaint} ${circumference}`;
+            segMaint.style.strokeDashoffset = `-${strokeAvail + strokeRent}`;
+        }
+
+        // 3. Distribución Regional de Despacho en Santander
+        const regionalContainer = document.getElementById('santander-regional-bars');
+        if (regionalContainer) {
+            const regionalData = [
+                { area: 'Bucaramanga (Cabecera, Centro, Provenza)', pct: 42, rev: '$ 20.4M', tools: '6 en obra' },
+                { area: 'Floridablanca (Cañaveral, Menzuly, Ruitoque)', pct: 28, rev: '$ 13.6M', tools: '4 en obra' },
+                { area: 'Girón (Zona Industrial Chimitá, Anillo Vial)', pct: 18, rev: '$ 8.7M', tools: '3 en obra' },
+                { area: 'Piedecuesta & Lebrija (Guatiguará, Palonegro)', pct: 12, rev: '$ 6.0M', tools: '1 en obra' }
+            ];
+
+            regionalContainer.innerHTML = regionalData.map(r => `
+                <div class="regional-bar-row">
+                    <div class="regional-bar-header">
+                        <span class="regional-bar-title">${r.area}</span>
+                        <span class="regional-bar-meta"><strong>${r.rev}</strong> • ${r.tools} (${r.pct}%)</span>
+                    </div>
+                    <div class="regional-bar-track">
+                        <div class="regional-bar-progress" style="width: ${r.pct}%;"></div>
+                    </div>
                 </div>
             `).join('');
         }
@@ -1097,10 +1181,122 @@
             });
         }
 
-        // Listener cuando el usuario entra desde el intro
-        window.addEventListener('rentatools:entered', () => {
-            showToast('¡Bienvenido a RentaTools PRO! Sistemas hidráulicos listos.', 'success', 4000);
-        });
+        // 4. Validador de Cerca Geográfica de Santander
+        setupGeofenceValidator();
+    }
+
+    function setupGeofenceValidator() {
+        const select = document.getElementById('geofence-municipality-select');
+        const addressInput = document.getElementById('geofence-address-input');
+        const btnRentNow = document.getElementById('btn-geo-rent-now');
+
+        const zoneMap = {
+            bga: {
+                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+                sub: 'Área Metropolitana de Bucaramanga • Despacho Habilitado',
+                depot: 'Patio Central Girón - Salida Palonegro',
+                time: '< 1.5 Horas',
+                freight: 'Tarifa Plana Metropolitana ($0 recargo)',
+                policy: 'Sura Obra Santander Vigente',
+                addr: 'Carrera 27 con Calle 36, Obra Centro, Bucaramanga'
+            },
+            florida: {
+                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+                sub: 'Área Metropolitana de Bucaramanga • Corredor Cañaveral/Menzuly',
+                depot: 'Patio Floridablanca (Valle de Menzuly)',
+                time: '< 1 Hora',
+                freight: 'Tarifa Plana Metropolitana ($0 recargo)',
+                policy: 'Sura Obra Santander Vigente',
+                addr: 'Autopista Floridablanca Km 4, Condominio Mensulí'
+            },
+            giron: {
+                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+                sub: 'Zona Industrial Chimitá • Salida Inmediata de Patios',
+                depot: 'Patio Central Girón (Anillo Vial Km 2.5)',
+                time: '< 45 Minutos',
+                freight: 'Despacho Directo en Parque ($0 recargo)',
+                policy: 'Sura Obra Santander Vigente',
+                addr: 'Anillo Vial Chimitá - Girón Km 2.5, Parque Industrial'
+            },
+            piede: {
+                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+                sub: 'Área Metropolitana de Bucaramanga • Sector Guatiguará',
+                depot: 'Patio Central Girón - Corredor Sur',
+                time: '< 2.5 Horas',
+                freight: 'Tarifa Plana Metropolitana ($0 recargo)',
+                policy: 'Sura Obra Santander Vigente',
+                addr: 'Vía Guatiguará Km 1.5, Zona de Expansión Piedecuesta'
+            },
+            lebrija: {
+                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+                sub: 'Corredor Palonegro • Cobertura Suburbana',
+                depot: 'Patio Central Girón - Vía Aeropuerto',
+                time: '< 3.5 Horas',
+                freight: 'Flete Suburbano Bonificado ($45.000 COP)',
+                policy: 'Sura Obra Santander Vigente',
+                addr: 'Sector Aeropuerto Palonegro, Entrada Lebrija'
+            },
+            barranca: {
+                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+                sub: 'Magdalena Medio • Equipos Pesados e Industriales',
+                depot: 'Sub-base Satélite Barrancabermeja - Vía Yuma',
+                time: '< 6 Horas',
+                freight: 'Flete Industrial Regional ($180.000 COP)',
+                policy: 'Póliza Ecopetrol/Sura Obra Vigente',
+                addr: 'Vía Yuma Km 12, Sector El Centro, Barrancabermeja'
+            },
+            sangil: {
+                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+                sub: 'Provincia Guanentá • Despacho Programado en Camabaja',
+                depot: 'Punto de Enlace San Gil - Vía Nacional',
+                time: '< 8 Horas',
+                freight: 'Flete Intermunicipal Programado ($220.000 COP)',
+                policy: 'Sura Obra Santander Vigente',
+                addr: 'Avenida 19 # 12-40, Obra Vía San Gil - Barichara'
+            }
+        };
+
+        function updateGeofenceDisplay() {
+            if (!select) return;
+            const data = zoneMap[select.value] || zoneMap.bga;
+
+            const titleEl = document.getElementById('geo-status-title');
+            const subEl = document.getElementById('geo-status-sub');
+            const depotEl = document.getElementById('geo-depot-val');
+            const timeEl = document.getElementById('geo-time-val');
+            const freightEl = document.getElementById('geo-freight-val');
+            const policyEl = document.getElementById('geo-policy-val');
+
+            if (titleEl) titleEl.textContent = data.title;
+            if (subEl) subEl.textContent = data.sub;
+            if (depotEl) depotEl.textContent = data.depot;
+            if (timeEl) timeEl.textContent = data.time;
+            if (freightEl) freightEl.textContent = data.freight;
+            if (policyEl) policyEl.textContent = data.policy;
+
+            if (addressInput && !addressInput.value) {
+                addressInput.value = data.addr;
+            }
+        }
+
+        if (select) {
+            select.addEventListener('change', () => {
+                if (addressInput && zoneMap[select.value]) {
+                    addressInput.value = zoneMap[select.value].addr;
+                }
+                updateGeofenceDisplay();
+                showToast(`Cerca Geográfica: ${select.options[select.selectedIndex].text} verificada.`, 'success', 2500);
+            });
+        }
+
+        if (btnRentNow) {
+            btnRentNow.addEventListener('click', () => {
+                switchTab('section-catalog');
+                showToast('Selecciona el equipo para tu obra en Santander.', 'info');
+            });
+        }
+
+        updateGeofenceDisplay();
     }
 
     // Inicialización Principal de la Aplicación

@@ -1377,63 +1377,120 @@ html, body {
     background: var(--bg-surface-subtle);
     border: 1px solid var(--border-color);
     padding: 2px 8px;
-    border-radius: 4px;
-}
-
+/* --------------------------------------------------------------------------
+   Estilos de Gráficas de BI (Legibles, Nítidas y Estructuradas)
+   -------------------------------------------------------------------------- */
 .bar-chart-container {
     width: 100%;
+    min-height: 250px;
 }
 
-.chart-bars {
+.bar-chart-visual {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    padding: 10px 10px 30px 45px;
     display: flex;
     align-items: flex-end;
+}
+
+.bar-chart-gridlines {
+    position: absolute;
+    inset: 10px 10px 30px 45px;
+    display: flex;
+    flex-direction: column;
     justify-content: space-between;
-    height: 180px;
-    gap: 12px;
-    padding-top: 10px;
+    pointer-events: none;
     border-bottom: 1px solid var(--border-color);
 }
 
-.chart-col {
+.bar-gridline {
+    position: relative;
+    width: 100%;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.grid-val {
+    position: absolute;
+    left: -42px;
+    top: -8px;
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+}
+
+.bar-chart-columns {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    gap: 12px;
+}
+
+.bar-column-item {
+    flex: 1;
+    max-width: 58px;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 1;
-    height: 100%;
     justify-content: flex-end;
+    position: relative;
 }
 
-.chart-bar-container {
-    width: 100%;
-    max-width: 40px;
-    height: 140px;
+.bar-column-val-tag {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
     background: var(--bg-surface-subtle);
-    border-radius: 4px 4px 0 0;
+    border: 1px solid var(--border-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    box-shadow: var(--shadow-xs);
+}
+
+.bar-column-track {
+    width: 100%;
+    height: 160px;
+    background: var(--bg-surface-subtle);
+    border-radius: 6px 6px 0 0;
     display: flex;
     align-items: flex-end;
     overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    border-bottom: none;
 }
 
-.chart-bar-fill {
+.bar-column-fill {
     width: 100%;
     background: var(--brand-primary);
     border-radius: 4px 4px 0 0;
-    transition: height 0.5s ease;
+    transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease;
 }
 
-.chart-col-label {
+.bar-column-item:hover .bar-column-fill {
+    background: #334155;
+}
+
+.bar-column-label {
+    position: absolute;
+    bottom: -24px;
     font-size: 0.72rem;
+    font-weight: 500;
     color: var(--text-muted);
-    margin-top: 8px;
+    white-space: nowrap;
+    text-align: center;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.chart-col-val {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-/* Donut Chart */
+/* Donut Chart Mejorado con Centro de Información */
 .donut-chart-container {
     display: flex;
     flex-direction: column;
@@ -1441,22 +1498,31 @@ html, body {
     padding: 10px 0;
 }
 
+.donut-svg-wrapper {
+    position: relative;
+    width: 170px;
+    height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .donut-svg {
-    width: 150px;
-    height: 150px;
+    width: 100%;
+    height: 100%;
     transform: rotate(-90deg);
 }
 
 .donut-bg {
     fill: none;
     stroke: var(--bg-surface-muted);
-    stroke-width: 24;
+    stroke-width: 22;
 }
 
 .donut-segment {
     fill: none;
-    stroke-width: 24;
-    transition: stroke-dasharray 0.6s ease;
+    stroke-width: 22;
+    transition: stroke-dasharray 0.6s ease, stroke-dashoffset 0.6s ease;
 }
 
 .segment-available {
@@ -1471,13 +1537,447 @@ html, body {
     stroke: var(--status-maint-text);
 }
 
+.donut-center-info {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
+}
+
+.donut-center-number {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.donut-center-label {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    max-width: 80px;
+    line-height: 1.2;
+}
+
 .donut-legend {
     width: 100%;
-    margin-top: 16px;
+    margin-top: 18px;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
+
+.legend-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.dot-available { background: var(--status-avail-text); }
+.dot-rented { background: var(--status-rent-text); }
+.dot-maint { background: var(--status-maint-text); }
+
+/* Tarjeta de Distribución Regional Santander */
+.regional-distribution-card {
+    margin-top: 24px;
+}
+
+.regional-bars-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.regional-bar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.regional-bar-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+}
+
+.regional-bar-title {
+    font-weight: 600;
+}
+
+.regional-bar-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.regional-bar-meta strong {
+    color: var(--text-primary);
+}
+
+.regional-bar-track {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-surface-subtle);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+}
+
+.regional-bar-progress {
+    height: 100%;
+    background: var(--brand-primary);
+    border-radius: var(--radius-full);
+    transition: width 0.6s ease;
+}
+
+/* --------------------------------------------------------------------------
+   Sección: Cerca Geográfica & Cobertura Santander
+   -------------------------------------------------------------------------- */
+.geofence-live-badge {
+    background: var(--status-avail-bg);
+    color: var(--status-avail-text);
+    border: 1px solid var(--status-avail-border);
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: 0.76rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.coverage-zones-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.zone-pill-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.zone-pill-card:hover {
+    transform: translateY(-2px);
+    border-color: #cbd5e1;
+}
+
+.zone-pill-card.active-zone {
+    border-left: 3px solid var(--status-avail-text);
+}
+
+.zone-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.zone-pill-card h4 {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.zone-pill-card p {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.zone-meta {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--status-avail-text);
+}
+
+.geofence-main-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 960px) {
+    .geofence-main-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.geofence-map-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.geofence-map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+}
+
+.geofence-gps-live {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--status-avail-text);
+    background: var(--status-avail-bg);
+    border: 1px solid var(--status-avail-border);
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.geofence-svg-wrapper {
+    width: 100%;
+    height: 380px;
+    background: #fbfcfd;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.geofence-map-svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Clases del Mapa SVG Santander */
+.map-dept-boundary {
+    fill: #f8fafc;
+    stroke: #cbd5e1;
+    stroke-width: 1.5;
+}
+
+.map-geofence-perimeter {
+    fill: none;
+    stroke: #94a3b8;
+    stroke-width: 1.5;
+    stroke-dasharray: 4 4;
+}
+
+.map-amb-geofence-area {
+    fill: rgba(34, 197, 94, 0.08);
+}
+
+.map-amb-geofence-stroke {
+    fill: none;
+    stroke: #16a34a;
+    stroke-width: 1.8;
+    stroke-dasharray: 6 3;
+}
+
+.map-highway {
+    stroke: #cbd5e1;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.hub-pulse {
+    fill: rgba(15, 23, 42, 0.15);
+    animation: hubPulse 2s infinite ease-out;
+}
+
+@keyframes hubPulse {
+    0% { r: 6; opacity: 1; }
+    100% { r: 18; opacity: 0; }
+}
+
+.hub-center {
+    fill: var(--brand-primary);
+    stroke: #ffffff;
+    stroke-width: 2;
+}
+
+.city-dot {
+    fill: #475569;
+    stroke: #ffffff;
+    stroke-width: 1.5;
+}
+
+.subhub-circle {
+    fill: none;
+    stroke: #0284c7;
+    stroke-width: 1.5;
+    stroke-dasharray: 3 3;
+}
+
+.map-hub-label {
+    font-size: 11px;
+    font-weight: 700;
+    fill: var(--text-primary);
+    font-family: var(--font-sans);
+}
+
+.map-city-label {
+    font-size: 10px;
+    font-weight: 600;
+    fill: var(--text-secondary);
+    font-family: var(--font-sans);
+}
+
+.map-city-label.text-right {
+    text-anchor: end;
+}
+
+.fleet-dot.active-gps {
+    fill: var(--status-avail-text);
+    stroke: #ffffff;
+    stroke-width: 1.5;
+    animation: blinkGlow 1.8s infinite;
+}
+
+.fleet-tag {
+    font-size: 8.5px;
+    font-weight: 600;
+    fill: #059669;
+    font-family: var(--font-mono);
+}
+
+.geofence-map-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+    font-size: 0.74rem;
+    color: var(--text-muted);
+}
+
+.legend-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-color-box {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.zone-amb-box {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid #16a34a;
+}
+
+.hub-box {
+    background: var(--brand-primary);
+}
+
+.gps-box {
+    background: var(--status-avail-text);
+}
+
+/* Tarjeta Validadora de Geocerca */
+.validator-controls {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.geofence-result-box {
+    background: var(--bg-surface-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.result-status-header {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.result-icon-check {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--status-avail-bg);
+    color: var(--status-avail-text);
+    border: 1px solid var(--status-avail-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.result-status-title {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--status-avail-text);
+    display: block;
+}
+
+.result-status-sub {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+}
+
+.result-specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 0;
+}
+
+.spec-cell {
+    display: flex;
+    flex-direction: column;
+}
+
+.spec-cell-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.spec-cell-val {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.geofence-check-badge {
+    margin-top: 4px;
+    font-size: 0.72rem;
+    color: var(--status-avail-text);
+    font-weight: 500;
+}
+
 
 .legend-row {
     display: flex;
