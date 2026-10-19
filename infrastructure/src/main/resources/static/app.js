@@ -195,9 +195,13 @@
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
         
-        let icon = 'ℹ️';
-        if (type === 'success') icon = '✅';
-        if (type === 'error') icon = '⚠️';
+        let icon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+        if (type === 'success') {
+            icon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+        }
+        if (type === 'error') {
+            icon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+        }
 
         toast.innerHTML = `
             <span class="toast-icon">${icon}</span>
@@ -304,10 +308,10 @@
 
         if (filtered.length === 0) {
             container.innerHTML = `
-                <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: rgba(15,23,42,0.6); border-radius: 14px;">
-                    <span style="font-size: 3rem;">🔍</span>
-                    <h3 style="margin-top: 12px; color: #fff;">No se encontraron maquinarias</h3>
-                    <p style="color: #94a3b8; font-size: 0.9rem;">Prueba modificando los filtros de categoría o el término de búsqueda.</p>
+                <div class="empty-state-card" style="grid-column: 1 / -1;">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" style="margin: 0 auto 10px; display: block;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <h3>No se encontraron maquinarias</h3>
+                    <p>Prueba modificando los filtros de categoría o el término de búsqueda.</p>
                 </div>
             `;
             return;
@@ -326,7 +330,7 @@
             }
 
             const specsHtml = tool.specs.slice(0, 3).map(s => `
-                <li><span class="spec-bullet">◆</span> ${s}</li>
+                <li><span class="spec-bullet">•</span> ${s}</li>
             `).join('');
 
             return `
@@ -354,7 +358,7 @@
                                 <span class="tool-rate-period">Tarifa por día • Depósito: ${currencyFormatter.format(tool.depositAmount)}</span>
                             </div>
                             <button class="btn-rent-card" data-action="rent" data-tool-id="${tool.id}" ${!isAvail ? 'disabled' : ''}>
-                                ${isAvail ? '⚡ Rentar' : 'No disponible'}
+                                ${isAvail ? 'Rentar Equipo' : 'No disponible'}
                             </button>
                         </div>
                     </div>
@@ -504,10 +508,10 @@
 
         if (state.reservations.length === 0) {
             container.innerHTML = `
-                <div style="text-align: center; padding: 48px; background: rgba(15,23,42,0.6); border-radius: 14px;">
-                    <span style="font-size: 3rem;">📦</span>
-                    <h3 style="margin-top: 12px; color: #fff;">No tienes alquileres en curso</h3>
-                    <p style="color: #94a3b8; font-size: 0.9rem;">Explora el catálogo y solicita tu primera maquinaria pesada hoy mismo.</p>
+                <div class="empty-state-card">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" style="margin: 0 auto 10px; display: block;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    <h3>No tienes alquileres en curso</h3>
+                    <p>Explora el catálogo y solicita tu primera maquinaria pesada hoy mismo.</p>
                 </div>
             `;
             return;
@@ -523,7 +527,7 @@
 
             const stepsHtml = steps.map(s => `
                 <div class="step-node ${s.completed ? 'completed' : ''} ${s.current ? 'current' : ''}">
-                    <div class="step-circle">${s.completed ? '✓' : '●'}</div>
+                    <div class="step-circle">${s.completed ? '✓' : ''}</div>
                     <span class="step-label">${s.label}</span>
                 </div>
             `).join('');
@@ -534,19 +538,19 @@
             if (res.status === 'REQUESTED') {
                 actionBtnHtml = `
                     <button class="btn-primary" data-action="pay-confirm" data-res-id="${res.id}">
-                        💳 Pagar Depósito & Confirmar
+                        Pagar Depósito &amp; Confirmar
                     </button>
                 `;
             } else if (res.status === 'CONFIRMED') {
                 actionBtnHtml = `
                     <button class="btn-secondary" data-action="dispatch-site" data-res-id="${res.id}">
-                        🚚 Registrar Llegada a Obra
+                        Registrar Llegada a Obra
                     </button>
                 `;
             } else if (res.status === 'DELIVERED') {
                 actionBtnHtml = `
                     <button class="btn-secondary" data-action="return-tool" data-res-id="${res.id}">
-                        🏁 Notificar Devolución
+                        Notificar Devolución
                     </button>
                 `;
             }
@@ -568,7 +572,7 @@
                         <div class="rental-item-icon"><img src="${res.toolImage}" alt="${res.toolName}" class="rental-item-photo"></div>
                         <div>
                             <h3 class="rental-item-name">${res.toolName}</h3>
-                            <div class="rental-item-dates">📍 Entrega: ${res.siteAddress}</div>
+                            <div class="rental-item-dates">Entrega en obra: ${res.siteAddress}</div>
                         </div>
                     </div>
 
@@ -586,7 +590,7 @@
                         </div>
                         <div class="rental-buttons-group">
                             <button class="btn-secondary" data-action="view-contract" data-res-id="${res.id}">
-                                📄 Ver Contrato & Acta
+                                Ver Contrato &amp; Acta
                             </button>
                             ${actionBtnHtml}
                         </div>

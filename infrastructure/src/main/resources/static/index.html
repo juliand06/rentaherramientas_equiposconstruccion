@@ -3,258 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="RentaTools PRO — Plataforma de Renta de Maquinaria y Equipos de Construcción. Catálogo en tiempo real, gestión de alquileres, panel de contratistas y métricas de operación.">
-    <meta name="theme-color" content="#0b0f17">
-    <title>RentaTools PRO | Plataforma Industrial de Renta de Maquinaria</title>
-    <!-- Google Fonts: Outfit & JetBrains Mono -->
+    <meta name="description" content="RentaTools PRO — Plataforma Profesional de Renta de Maquinaria y Equipos de Construcción. Catálogo certificado en tiempo real, gestión de contratos y métricas de operación.">
+    <meta name="theme-color" content="#ffffff">
+    <title>RentaTools PRO | Plataforma de Renta de Maquinaria de Construcción</title>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-    <!-- ================================================================= -->
-    <!-- INTRO SPLASH SCREEN: ARTEFACTO MECÁNICO INTERACTIVO               -->
-    <!-- ================================================================= -->
-    <div id="intro-screen" class="intro-screen" role="dialog" aria-modal="true" aria-label="Pantalla de inicio interactiva">
-        <!-- Canvas para partículas ambientales, destellos y chispas -->
-        <canvas id="intro-canvas" class="intro-canvas"></canvas>
-
-        <!-- Rejilla holográfica de fondo -->
-        <div class="hologram-grid"></div>
-        <div class="vignette-overlay"></div>
-
-        <!-- Barra superior del splash con controles -->
-        <header class="intro-topbar">
-            <div class="intro-brand">
-                <span class="pulse-indicator"></span>
-                <span class="brand-tag">SISTEMA HIDRÁULICO INDUSTRIAL v1.0</span>
-            </div>
-            <div class="intro-controls">
-                <button id="btn-sound-toggle" class="intro-ctrl-btn" title="Alternar Sonido Sintetizado" aria-label="Alternar sonido">
-                    <span id="sound-icon">🔊</span> <span class="ctrl-label">AUDIO FX</span>
-                </button>
-                <button id="btn-skip-intro" class="intro-ctrl-btn skip-btn" title="Saltar animación y entrar directamente">
-                    <span>SALTAR INTRO</span> ➔
-                </button>
-            </div>
-        </header>
-
-        <!-- Contenedor central del artefacto interactivo -->
-        <div class="intro-centerpiece">
-            <!-- HUD de Telemetría Superior -->
-            <div class="artifact-hud top-hud">
-                <div class="hud-item"><span class="hud-label">PRESIÓN:</span> <span class="hud-val" id="hud-pressure">385 BAR</span></div>
-                <div class="hud-item"><span class="hud-label">TORQUE:</span> <span class="hud-val">1,240 Nm</span></div>
-                <div class="hud-item"><span class="hud-label">SISTEMA:</span> <span class="hud-val status-ok">LISTO PARA OPERAR</span></div>
-            </div>
-
-            <!-- ARTEFACTO: EXCAVADORA HIDRÁULICA Y MARTILLO PESADO MECÁNICO -->
-            <div class="machine-artifact-wrapper" id="artifact-target" tabindex="0" role="button" aria-label="Hacer clic para activar maquinaria y entrar a la plataforma">
-                <!-- Anillo de energía / radar de fondo -->
-                <div class="energy-ring"></div>
-                <div class="laser-scanner"></div>
-
-                <!-- SVG Artefacto de Maquinaria Pesada con Cinemática Reactiva -->
-                <svg id="machinery-svg" class="machinery-svg" viewBox="0 0 700 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <!-- Gradientes Industriales -->
-                        <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#334155" />
-                            <stop offset="50%" stop-color="#1e293b" />
-                            <stop offset="100%" stop-color="#0f172a" />
-                        </linearGradient>
-                        <linearGradient id="safetyGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#fef08a" />
-                            <stop offset="35%" stop-color="#f59e0b" />
-                            <stop offset="100%" stop-color="#b45309" />
-                        </linearGradient>
-                        <linearGradient id="chromeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#e2e8f0" />
-                            <stop offset="40%" stop-color="#ffffff" />
-                            <stop offset="70%" stop-color="#94a3b8" />
-                            <stop offset="100%" stop-color="#64748b" />
-                        </linearGradient>
-                        <linearGradient id="laserBeam" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
-                            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
-                        </linearGradient>
-                        <!-- Filtros de Brillo / Neon Glow -->
-                        <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
-                            <feGaussianBlur stdDeviation="8" result="blur" />
-                            <feMerge>
-                                <feMergeNode in="blur" />
-                                <feMergeNode in="SourceGraphic" />
-                            </feMerge>
-                        </filter>
-                        <filter id="sparkGlow" x="-50%" y="-50%" width="200%" height="200%">
-                            <feGaussianBlur stdDeviation="4" result="blur" />
-                            <feMerge>
-                                <feMergeNode in="blur" />
-                                <feMergeNode in="SourceGraphic" />
-                            </feMerge>
-                        </filter>
-                    </defs>
-
-                    <!-- Haz Láser de Guía hacia el Suelo -->
-                    <polygon points="460,350 490,440 430,440" fill="url(#laserBeam)" opacity="0.35" class="laser-beam-anim" />
-
-                    <!-- Base Orugas / Tren de Rodaje Pesado -->
-                    <g id="tracks-group" class="tracks-group">
-                        <!-- Chasis inferior -->
-                        <rect x="130" y="380" width="280" height="45" rx="20" fill="url(#metalGrad)" stroke="#475569" stroke-width="3"/>
-                        <!-- Rayas de advertencia industrial en la oruga -->
-                        <g opacity="0.6">
-                            <line x1="160" y1="380" x2="180" y2="425" stroke="#f59e0b" stroke-width="4"/>
-                            <line x1="200" y1="380" x2="220" y2="425" stroke="#f59e0b" stroke-width="4"/>
-                            <line x1="240" y1="380" x2="260" y2="425" stroke="#f59e0b" stroke-width="4"/>
-                            <line x1="280" y1="380" x2="300" y2="425" stroke="#f59e0b" stroke-width="4"/>
-                            <line x1="320" y1="380" x2="340" y2="425" stroke="#f59e0b" stroke-width="4"/>
-                            <line x1="360" y1="380" x2="380" y2="425" stroke="#f59e0b" stroke-width="4"/>
-                        </g>
-                        <!-- Ruedas y Rodillos Internos Giratorios -->
-                        <circle cx="160" cy="402" r="16" fill="#0f172a" stroke="#64748b" stroke-width="3" class="cog-wheel"/>
-                        <circle cx="215" cy="402" r="14" fill="#0f172a" stroke="#64748b" stroke-width="2.5" class="cog-wheel reverse"/>
-                        <circle cx="270" cy="402" r="14" fill="#0f172a" stroke="#64748b" stroke-width="2.5" class="cog-wheel"/>
-                        <circle cx="325" cy="402" r="14" fill="#0f172a" stroke="#64748b" stroke-width="2.5" class="cog-wheel reverse"/>
-                        <circle cx="380" cy="402" r="16" fill="#0f172a" stroke="#64748b" stroke-width="3" class="cog-wheel"/>
-                        <!-- Ejes centrales dorados -->
-                        <circle cx="160" cy="402" r="5" fill="#f59e0b"/>
-                        <circle cx="215" cy="402" r="4" fill="#f59e0b"/>
-                        <circle cx="270" cy="402" r="4" fill="#f59e0b"/>
-                        <circle cx="325" cy="402" r="4" fill="#f59e0b"/>
-                        <circle cx="380" cy="402" r="5" fill="#f59e0b"/>
-                    </g>
-
-                    <!-- Plataforma Giratoria / Corona de Giro -->
-                    <rect x="200" y="360" width="140" height="20" rx="4" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
-                    <circle cx="270" cy="370" r="6" fill="#38bdf8" filter="url(#goldGlow)"/>
-
-                    <!-- Cabina del Operador y Carrocería Pesada -->
-                    <g id="cabin-group" class="cabin-group">
-                        <!-- Contrapeso Trasero Motor -->
-                        <path d="M 140 360 L 160 270 L 220 270 L 230 360 Z" fill="url(#metalGrad)" stroke="#475569" stroke-width="3"/>
-                        <rect x="155" y="295" width="55" height="12" rx="3" fill="#0f172a"/>
-                        <!-- Luces de estado de motor -->
-                        <circle cx="170" cy="301" r="3" fill="#22c55e" class="blink-led"/>
-                        <circle cx="185" cy="301" r="3" fill="#f59e0b" class="blink-led delay-1"/>
-                        <circle cx="200" cy="301" r="3" fill="#38bdf8" class="blink-led delay-2"/>
-
-                        <!-- Cuerpo de la Cabina -->
-                        <path d="M 225 360 L 235 250 L 320 250 L 335 360 Z" fill="url(#safetyGold)" stroke="#d97706" stroke-width="3"/>
-                        
-                        <!-- Ventana Panorámica de Cristal Blindado -->
-                        <path d="M 245 260 L 310 260 L 320 320 L 245 320 Z" fill="#0ea5e9" opacity="0.35" stroke="#38bdf8" stroke-width="2"/>
-                        <line x1="255" y1="265" x2="280" y2="315" stroke="#ffffff" stroke-width="2" opacity="0.6"/>
-
-                        <!-- Baliza Giratoria de Seguridad Superior -->
-                        <rect x="265" y="240" width="16" height="10" rx="2" fill="#1e293b"/>
-                        <circle cx="273" cy="235" r="7" fill="#f59e0b" filter="url(#goldGlow)" class="beacon-pulse"/>
-
-                        <!-- Foco de Trabajo Delantero -->
-                        <polygon points="330,300 345,295 345,315 330,310" fill="#e2e8f0" stroke="#475569" stroke-width="1.5"/>
-                        <circle cx="342" cy="305" r="5" fill="#fef08a" filter="url(#goldGlow)"/>
-                    </g>
-
-                    <!-- BRAZO HIDRÁULICO ARTICULADO (Controlado por Cinemática Reactiva) -->
-                    <!-- Brazo Primario (Boom) -->
-                    <g id="arm-boom" class="arm-boom" transform-origin="310 330">
-                        <!-- Pivote Principal Reforzado -->
-                        <circle cx="310" cy="330" r="16" fill="url(#metalGrad)" stroke="#f59e0b" stroke-width="3.5"/>
-                        <circle cx="310" cy="330" r="6" fill="#f59e0b"/>
-
-                        <!-- Viga del Brazo Primario de Alta Resistencia -->
-                        <path d="M 310 330 L 400 170 L 430 185 L 325 345 Z" fill="url(#safetyGold)" stroke="#b45309" stroke-width="3"/>
-                        <text x="345" y="270" transform="rotate(-58 345 270)" fill="#1e293b" font-family="'Outfit', sans-serif" font-weight="900" font-size="12" letter-spacing="2">RENTATOOLS</text>
-
-                        <!-- Cilindro Hidráulico Principal (Pistón) -->
-                        <g id="hydraulic-piston-1">
-                            <rect x="290" y="280" width="12" height="70" rx="6" fill="#1e293b" stroke="#475569" stroke-width="2" transform="rotate(32 290 280)"/>
-                            <rect x="293" y="235" width="6" height="55" rx="3" fill="url(#chromeGrad)" transform="rotate(32 293 235)" class="piston-rod-1"/>
-                        </g>
-
-                        <!-- Brazo Secundario (Stick / Dipper) -->
-                        <g id="arm-stick" class="arm-stick" transform-origin="415 178">
-                            <!-- Articulación Media (Codo) -->
-                            <circle cx="415" cy="178" r="13" fill="url(#metalGrad)" stroke="#38bdf8" stroke-width="3"/>
-                            <circle cx="415" cy="178" r="5" fill="#38bdf8"/>
-
-                            <!-- Viga del Brazo Secundario -->
-                            <path d="M 415 178 L 470 330 L 445 338 L 400 186 Z" fill="url(#metalGrad)" stroke="#475569" stroke-width="3"/>
-
-                            <!-- Cilindro Hidráulico Secundario -->
-                            <rect x="425" y="210" width="8" height="60" rx="4" fill="#0f172a" stroke="#64748b" stroke-width="1.5" transform="rotate(-20 425 210)"/>
-                            <rect x="427" y="260" width="4" height="40" rx="2" fill="url(#chromeGrad)" transform="rotate(-20 427 260)"/>
-
-                            <!-- ARTEFACTO TERMINAL: MARTILLO NEUMÁTICO / BALDE ROTATIVO DE ALTO IMPACTO -->
-                            <g id="tool-head" class="tool-head" transform-origin="460 335">
-                                <!-- Articulación Muñeca -->
-                                <circle cx="460" cy="335" r="10" fill="url(#metalGrad)" stroke="#f59e0b" stroke-width="2.5"/>
-                                <circle cx="460" cy="335" r="4" fill="#f59e0b"/>
-
-                                <!-- Carcasa del Percutor / Martillo Hidráulico -->
-                                <rect x="445" y="340" width="30" height="55" rx="4" fill="url(#safetyGold)" stroke="#d97706" stroke-width="2.5"/>
-                                <line x1="450" y1="355" x2="470" y2="355" stroke="#1e293b" stroke-width="3"/>
-                                <line x1="450" y1="370" x2="470" y2="370" stroke="#1e293b" stroke-width="3"/>
-                                <line x1="450" y1="385" x2="470" y2="385" stroke="#1e293b" stroke-width="3"/>
-
-                                <!-- Punta Cincel de Acero Forjado al Wolframio -->
-                                <polygon points="453,395 467,395 462,440 458,440" fill="url(#chromeGrad)" stroke="#475569" stroke-width="1.5" class="chisel-impact"/>
-
-                                <!-- Núcleo de Energía / Chispa de Contacto -->
-                                <circle id="impact-spark-point" cx="460" cy="442" r="6" fill="#fef08a" filter="url(#sparkGlow)" class="spark-core-anim"/>
-                            </g>
-                        </g>
-                    </g>
-
-                    <!-- Suelo / Terreno con Marcadores de Obra -->
-                    <line x1="60" y1="440" x2="640" y2="440" stroke="#334155" stroke-width="3" stroke-dasharray="8 6"/>
-                    <circle cx="460" cy="440" r="28" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.7" class="target-reticle"/>
-                    <circle cx="460" cy="440" r="14" stroke="#38bdf8" stroke-width="1.5" opacity="0.8"/>
-                </svg>
-
-                <!-- Glow interactivo que sigue al mouse -->
-                <div class="artifact-interactive-glow" id="mouse-glow"></div>
-            </div>
-
-            <!-- TÍTULO DINÁMICO & LLAMADO A LA ACCIÓN INTERACTIVO -->
-            <div class="intro-action-zone">
-                <div class="badge-industrial">
-                    <span class="gear-icon">⚙️</span> PLATAFORMA DE MAQUINARIA PESADA Y CONSTRUCCIÓN
-                </div>
-                <h1 class="intro-headline">
-                    RENTATOOLS <span class="accent-text">PRO</span>
-                </h1>
-                <p class="intro-subtext">
-                    Haz clic en el <strong>Artefacto Mecánico</strong> o presiona el botón inferior para activar los sistemas hidráulicos y desbloquear la plataforma.
-                </p>
-
-                <!-- BOTÓN PRINCIPAL DE IGNICIÓN / DESBLOQUEO -->
-                <button id="btn-enter-platform" class="btn-ignition-enter" aria-label="Iniciar Maquinaria e Ingresar al Sistema">
-                    <span class="btn-ambient-glow"></span>
-                    <span class="btn-ignition-icon">⚡</span>
-                    <span class="btn-text-group">
-                        <span class="btn-main-label">ARRANCAR SISTEMA INDUSTRIAL</span>
-                        <span class="btn-sub-label">CLIC PARA ACCEDER A LA PLATAFORMA</span>
-                    </span>
-                    <span class="btn-arrow">➔</span>
-                </button>
-            </div>
-
-            <!-- HUD de Telemetría Inferior -->
-            <div class="artifact-hud bottom-hud">
-                <div class="hud-item"><span class="hud-label">CALIDAD DE EQUIPOS:</span> <span class="hud-val">ISO 9001 / CAT CERTIFIED</span></div>
-                <div class="hud-item"><span class="hud-label">COBERTURA:</span> <span class="hud-val">BOGOTÁ, MEDELLÍN, CALI, BARRANQUILLA</span></div>
-                <div class="hud-item"><span class="hud-label">DISPONIBILIDAD:</span> <span class="hud-val text-gold">EN LÍNEA</span></div>
-            </div>
-        </div>
-
-        <!-- Compuertas mecánicas de transición (Blast Doors) -->
-        <div class="blast-door door-left" id="door-left"></div>
-        <div class="blast-door door-right" id="door-right"></div>
-    </div>
-
 
     <!-- ================================================================= -->
     <!-- MAIN APPLICATION PORTAL: PLATAFORMA COMPLETA                      -->
@@ -264,49 +22,67 @@
         <!-- NAVBAR PRINCIPAL -->
         <header class="app-header">
             <div class="header-inner">
-                <!-- Logotipo e Identidad -->
+                <!-- Logotipo e Identidad Minimalista -->
                 <div class="brand-container" id="logo-refresh" style="cursor: pointer;" title="Ir al Catálogo">
                     <div class="brand-logo-icon">
-                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M2 20h20M5 20V8l7-5 7 5v12M9 14h6M9 10h6" stroke="#f59e0b"/>
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="3" stroke="#ffffff"/>
+                            <path d="M3 9h18M9 21V9" stroke="#ffffff"/>
                         </svg>
                     </div>
                     <div class="brand-text-block">
                         <span class="brand-title">RentaTools <span class="brand-accent">PRO</span></span>
-                        <span class="brand-tagline">Equipos & Maquinaria de Obra</span>
+                        <span class="brand-tagline">Equipos &amp; Maquinaria de Obra</span>
                     </div>
                 </div>
 
                 <!-- Enlaces de Navegación -->
                 <nav class="app-nav" aria-label="Navegación Principal">
                     <button class="nav-tab active" data-target="section-catalog">
-                        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span> Catálogo de Equipos
+                        <span class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                                <rect x="14" y="14" width="7" height="7" rx="1"/>
+                            </svg>
+                        </span> Catálogo de Equipos
                     </button>
                     <button class="nav-tab" data-target="section-client-rentals" id="tab-my-rentals">
-                        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg></span> Mis Alquileres <span class="badge-count" id="active-rentals-count">1</span>
+                        <span class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                                <rect x="9" y="3" width="6" height="4" rx="1"/>
+                                <path d="M9 14l2 2 4-4"/>
+                            </svg>
+                        </span> Mis Alquileres <span class="badge-count" id="active-rentals-count">1</span>
                     </button>
                     <button class="nav-tab" data-target="section-provider" id="tab-provider">
-                        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></span> Panel Proveedor
+                        <span class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+                            </svg>
+                        </span> Panel Proveedor
                     </button>
                     <button class="nav-tab" data-target="section-analytics" id="tab-analytics">
-                        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span> Métricas &amp; BI
+                        <span class="nav-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 20V10M12 20V4M6 20v-6"/>
+                            </svg>
+                        </span> Métricas &amp; BI
                     </button>
                 </nav>
 
-                <!-- Barra Rápida de Perfiles de Prueba (Demo Roles) -->
+                <!-- Barra de Roles Rápida para Demostración -->
                 <div class="role-selector-bar" title="Cambiar rol activo para demostración">
-                    <span class="role-selector-label">VISTA ROL:</span>
-                    <button class="role-chip active" data-role="CLIENT" id="role-client-btn">👷 Cliente</button>
-                    <button class="role-chip" data-role="PROVIDER" id="role-provider-btn">🏗 Proveedor</button>
-                    <button class="role-chip" data-role="ADMIN" id="role-admin-btn">🛡 Admin</button>
+                    <span class="role-selector-label">ROL:</span>
+                    <button class="role-chip active" data-role="CLIENT" id="role-client-btn">Cliente</button>
+                    <button class="role-chip" data-role="PROVIDER" id="role-provider-btn">Proveedor</button>
+                    <button class="role-chip" data-role="ADMIN" id="role-admin-btn">Admin</button>
                 </div>
 
                 <!-- Acciones de Usuario & Autenticación -->
                 <div class="header-user-actions">
-                    <button id="btn-replay-intro" class="btn-icon-replay" title="Volver a ver la animación de inicio" aria-label="Repetir animación de inicio">
-                        <span>🎬</span> <span class="btn-replay-text">Ver Intro</span>
-                    </button>
-
                     <div id="auth-guest-box" class="auth-guest-box">
                         <button id="btn-open-login" class="btn-auth-login">Iniciar Sesión</button>
                         <button id="btn-open-register" class="btn-auth-register">Registrarse</button>
@@ -324,7 +100,6 @@
             </div>
         </header>
 
-
         <!-- CONTENIDO PRINCIPAL -->
         <main class="app-main-content">
 
@@ -333,59 +108,58 @@
             <!-- ============================================================= -->
             <section id="section-catalog" class="content-section active">
                 
-                <!-- Hero Promocional Tecnológico -->
+                <!-- Hero Promocional Sereno y Minimalista -->
                 <div class="hero-banner">
-                    <div class="hero-ambient-shape shape-1"></div>
-                    <div class="hero-ambient-shape shape-2"></div>
                     <div class="hero-content">
                         <div class="hero-badge">
-                            <span class="pulse-dot"></span> EQUIPOS INDUSTRIALES DISPONIBLES EN TIEMPO REAL
+                            <span class="pulse-dot"></span> Equipos Certificados en Tiempo Real
                         </div>
                         <h2 class="hero-title">
-                            Renta de Maquinaria Pesada & Herramientas de Alto Rendimiento
+                            Renta de Maquinaria Pesada &amp; Equipos de Obra
                         </h2>
                         <p class="hero-desc">
-                            Accede a retroexcavadoras, martillos demoledores, plantas eléctricas y torres de iluminación con contratos digitales y entrega garantizada en obra en menos de 24 horas.
+                            Disponibilidad inmediata, liquidación de tarifas transparentes y seguimiento digital de contratos para proyectos de ingeniería civil y arquitectura.
                         </p>
 
                         <!-- Filtros Rápidos y Buscador en el Hero -->
                         <div class="hero-search-card">
                             <div class="search-input-wrapper">
-                                <span class="search-icon">🔍</span>
-                                <input type="text" id="catalog-search" placeholder="Buscar por nombre, marca o modelo (ej. Caterpillar, Bosch, Bomag)..." aria-label="Buscar maquinaria">
+                                <span class="search-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"/>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                    </svg>
+                                </span>
+                                <input type="text" id="catalog-search" placeholder="Buscar por equipo o marca (ej. Caterpillar, Bosch, IMER)..." aria-label="Buscar maquinaria">
                             </div>
                             <div class="search-filter-group">
                                 <select id="filter-availability" class="custom-select" aria-label="Filtrar por disponibilidad">
                                     <option value="ALL">Todas las disponibilidades</option>
-                                    <option value="AVAILABLE" selected>Solo Disponibles Ahora</option>
+                                    <option value="AVAILABLE" selected>Solo Disponibles</option>
                                     <option value="RENTED">En Renta</option>
                                     <option value="MAINTENANCE">En Mantenimiento</option>
                                 </select>
                                 <select id="sort-price" class="custom-select" aria-label="Ordenar por precio">
                                     <option value="DEFAULT">Ordenar: Destacados</option>
-                                    <option value="PRICE_ASC">Precio: Menor a Mayor</option>
-                                    <option value="PRICE_DESC">Precio: Mayor a Menor</option>
+                                    <option value="PRICE_ASC">Tarifa: Menor a Mayor</option>
+                                    <option value="PRICE_DESC">Tarifa: Mayor a Menor</option>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- Métricas Clave de Confianza -->
+                        <!-- Fila de Métricas Clave Tranquilas -->
                         <div class="hero-stats-row">
-                            <div class="stat-pill">
-                                <span class="stat-val">+480</span>
-                                <span class="stat-lbl">Maquinarias en Flota</span>
+                            <div class="stat-item">
+                                <span class="stat-number">32 Equipos</span>
+                                <span class="stat-text">Flota total registrada</span>
                             </div>
-                            <div class="stat-pill">
-                                <span class="stat-val">99.4%</span>
-                                <span class="stat-lbl">Disponibilidad Operativa</span>
+                            <div class="stat-item">
+                                <span class="stat-number">&lt; 24 Horas</span>
+                                <span class="stat-text">Despacho en obra</span>
                             </div>
-                            <div class="stat-pill">
-                                <span class="stat-val">100%</span>
-                                <span class="stat-lbl">Póliza Todo Riesgo</span>
-                            </div>
-                            <div class="stat-pill">
-                                <span class="stat-val">&lt; 24h</span>
-                                <span class="stat-lbl">Despacho a Obra</span>
+                            <div class="stat-item">
+                                <span class="stat-number">100% Digital</span>
+                                <span class="stat-text">Contratos y pólizas de garantía</span>
                             </div>
                         </div>
                     </div>
@@ -395,22 +169,22 @@
                 <div class="categories-nav-wrapper">
                     <div class="categories-nav" id="categories-filter-bar">
                         <button class="cat-pill active" data-category="ALL">
-                            <span class="cat-icon">⚡</span> Todas las Categorías
+                            Todas las Categorías
                         </button>
                         <button class="cat-pill" data-category="DEMOLITION">
-                            <span class="cat-icon">🔨</span> Demolición & Perforación
+                            Demolición &amp; Perforación
                         </button>
                         <button class="cat-pill" data-category="EARTHWORK">
-                            <span class="cat-icon">🚜</span> Movimiento de Tierras
+                            Movimiento de Tierras
                         </button>
                         <button class="cat-pill" data-category="CONCRETE">
-                            <span class="cat-icon">🧱</span> Concreto & Mezclado
+                            Concreto &amp; Mezclado
                         </button>
                         <button class="cat-pill" data-category="LIFTING">
-                            <span class="cat-icon">🏗️</span> Altura & Elevación
+                            Altura &amp; Elevación
                         </button>
                         <button class="cat-pill" data-category="POWER">
-                            <span class="cat-icon">🔋</span> Generación Eléctrica
+                            Generación Eléctrica
                         </button>
                     </div>
                 </div>
@@ -418,7 +192,7 @@
                 <!-- Encabezado de Resultados del Catálogo -->
                 <div class="catalog-header-bar">
                     <div class="catalog-count-info">
-                        Mostrando <strong id="catalog-count-num">8</strong> equipos listos para contratación inmediata
+                        Mostrando <strong id="catalog-count-num">8</strong> maquinarias en catálogo
                     </div>
                     <div class="currency-tag">
                         <span>Moneda: <strong>COP ($ Pesos Colombianos)</strong></span>
@@ -431,18 +205,24 @@
                 </div>
             </section>
 
-
             <!-- ============================================================= -->
             <!-- SECCIÓN 2: MIS ALQUILERES & SEGUIMIENTO (CLIENTE)            -->
             <!-- ============================================================= -->
             <section id="section-client-rentals" class="content-section">
                 <div class="section-header">
                     <div>
-                        <h2 class="section-title">📦 Centro de Control de Alquileres</h2>
-                        <p class="section-desc">Monitorea el ciclo de vida de tus solicitudes, realiza pagos de depósito y visualiza actas de entrega.</p>
+                        <h2 class="section-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                                <rect x="9" y="3" width="6" height="4" rx="1"/>
+                                <path d="M9 14l2 2 4-4"/>
+                            </svg>
+                            Centro de Control de Alquileres
+                        </h2>
+                        <p class="section-desc">Monitorea el ciclo de vida de tus solicitudes, confirmación de depósito y actas de obra.</p>
                     </div>
                     <button class="btn-primary" id="btn-new-rental-nav">
-                        <span>+</span> Alquilar Otro Equipo
+                        + Solicitar Otra Maquinaria
                     </button>
                 </div>
 
@@ -452,19 +232,22 @@
                 </div>
             </section>
 
-
             <!-- ============================================================= -->
             <!-- SECCIÓN 3: PANEL DE PROVEEDOR (PUBLICACIÓN DE EQUIPOS)        -->
             <!-- ============================================================= -->
             <section id="section-provider" class="content-section">
                 <div class="section-header">
                     <div>
-                        <h2 class="section-title">🏗 Portal del Proveedor de Maquinaria</h2>
+                        <h2 class="section-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+                            </svg>
+                            Portal del Proveedor de Maquinaria
+                        </h2>
                         <p class="section-desc">Publica equipos en renta, gestiona el inventario de tu parque automotor y maximiza tu rentabilidad.</p>
                     </div>
                     <div class="provider-earnings-badge">
-                        <span class="earnings-label">Ganancias este mes:</span>
-                        <span class="earnings-val" id="provider-month-earnings">$ 14.850.000 COP</span>
+                        <span>Ganancias este mes: <strong id="provider-month-earnings">$ 14.850.000 COP</strong></span>
                     </div>
                 </div>
 
@@ -472,21 +255,21 @@
                     <!-- Formulario de Publicación de Nueva Maquinaria -->
                     <div class="glass-card provider-form-card">
                         <h3 class="card-heading">
-                            <span class="card-icon">➕</span> Publicar Nueva Maquinaria o Herramienta
+                            Registrar Nuevo Equipo
                         </h3>
                         <form id="form-create-tool" class="form-standard">
                             <div class="form-row">
                                 <div class="form-field">
                                     <label for="new-tool-name">Nombre Comercial del Equipo *</label>
-                                    <input type="text" id="new-tool-name" required placeholder="Ej. Miniexcavadora Orugas CAT 305.5E2">
+                                    <input type="text" id="new-tool-name" required placeholder="Ej. Miniexcavadora CAT 305.5E2">
                                 </div>
                                 <div class="form-field">
                                     <label for="new-tool-category">Categoría Industrial *</label>
                                     <select id="new-tool-category" required class="custom-select">
-                                        <option value="DEMOLITION">Demolición & Perforación</option>
+                                        <option value="DEMOLITION">Demolición &amp; Perforación</option>
                                         <option value="EARTHWORK" selected>Movimiento de Tierras</option>
-                                        <option value="CONCRETE">Concreto & Mezclado</option>
-                                        <option value="LIFTING">Altura & Elevación</option>
+                                        <option value="CONCRETE">Concreto &amp; Mezclado</option>
+                                        <option value="LIFTING">Altura &amp; Elevación</option>
                                         <option value="POWER">Generación Eléctrica</option>
                                     </select>
                                 </div>
@@ -494,7 +277,7 @@
 
                             <div class="form-row">
                                 <div class="form-field">
-                                    <label for="new-tool-price">Tarifa de Alquiler por Día (COP) *</label>
+                                    <label for="new-tool-price">Tarifa por Día (COP) *</label>
                                     <input type="number" id="new-tool-price" required min="10000" step="5000" placeholder="Ej. 350000">
                                 </div>
                                 <div class="form-field">
@@ -505,22 +288,22 @@
 
                             <div class="form-row">
                                 <div class="form-field">
-                                    <label for="new-tool-serial">Número de Serie / Placa *</label>
+                                    <label for="new-tool-serial">Número de Serie o Placa *</label>
                                     <input type="text" id="new-tool-serial" required placeholder="Ej. CAT-2024-X981">
                                 </div>
                                 <div class="form-field">
-                                    <label for="new-tool-brand">Marca & Fabricante *</label>
+                                    <label for="new-tool-brand">Marca o Fabricante *</label>
                                     <input type="text" id="new-tool-brand" required placeholder="Ej. Caterpillar / Bobcat / Bosch">
                                 </div>
                             </div>
 
                             <div class="form-field">
                                 <label for="new-tool-specs">Especificaciones Técnicas Clave</label>
-                                <textarea id="new-tool-specs" rows="3" placeholder="Ej. Potencia: 44.1 kW, Peso Operativo: 5.4 Ton, Capacidad de Cucharón: 0.22 m³, Combustible: Diesel"></textarea>
+                                <textarea id="new-tool-specs" rows="3" placeholder="Ej. Potencia: 44.1 kW, Peso Operativo: 5.4 Ton, Capacidad de Cucharón: 0.22 m³"></textarea>
                             </div>
 
                             <button type="submit" class="btn-primary w-full">
-                                <span>🚀</span> Registrar Equipo en el Catálogo Oficial
+                                Publicar en el Catálogo
                             </button>
                         </form>
                     </div>
@@ -528,7 +311,7 @@
                     <!-- Lista de Equipos del Proveedor -->
                     <div class="glass-card provider-inventory-card">
                         <h3 class="card-heading">
-                            <span class="card-icon">📋</span> Tus Equipos Registrados (<span id="provider-tools-count">4</span>)
+                            Equipos Registrados (<span id="provider-tools-count">4</span>)
                         </h3>
                         <div class="provider-tools-list" id="provider-tools-list">
                             <!-- Inyectado vía JS -->
@@ -537,81 +320,104 @@
                 </div>
             </section>
 
-
             <!-- ============================================================= -->
             <!-- SECCIÓN 4: ANALÍTICAS Y BUSINESS INTELLIGENCE (ADMIN)         -->
             <!-- ============================================================= -->
             <section id="section-analytics" class="content-section">
                 <div class="section-header">
                     <div>
-                        <h2 class="section-title"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" style="vertical-align: -3px; margin-right: 6px;"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Tablero Ejecutivo de Analítica &amp; Negocio</h2>
-                        <p class="section-desc">Métricas operativas del backend (`/api/reports/metrics`), rendimiento de facturación y ocupación.</p>
+                        <h2 class="section-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 20V10M12 20V4M6 20v-6"/>
+                            </svg>
+                            Tablero Ejecutivo de Analítica &amp; Negocio
+                        </h2>
+                        <p class="section-desc">Métricas operativas del backend, facturación consolidada y ocupación del parque automotor.</p>
                     </div>
                     <button class="btn-secondary" id="btn-download-pdf-report">
-                        <span>📄</span> Descargar Informe Gerencial (PDF)
+                        Descargar Informe (PDF)
                     </button>
                 </div>
 
-                <!-- Tarjetas KPI Principales -->
+                <!-- Tarjetas KPI Principales con Iconografía SVG Minimalista -->
                 <div class="metrics-kpi-grid">
                     <div class="kpi-card">
-                        <div class="kpi-icon-box gold">💰</div>
+                        <div class="kpi-icon-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="1" x2="12" y2="23"/>
+                                <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                            </svg>
+                        </div>
                         <div class="kpi-data">
                             <span class="kpi-label">Ingresos Totales Facturados</span>
                             <span class="kpi-value" id="kpi-revenue">$ 48.720.000 COP</span>
-                            <span class="kpi-trend positive">▲ +18.4% vs mes anterior</span>
+                            <span class="kpi-trend positive">+18.4% vs mes anterior</span>
                         </div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-icon-box blue">📦</div>
+                        <div class="kpi-icon-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                                <line x1="12" y1="22.08" x2="12" y2="12"/>
+                            </svg>
+                        </div>
                         <div class="kpi-data">
                             <span class="kpi-label">Alquileres Activos en Obra</span>
                             <span class="kpi-value" id="kpi-active-rentals">14</span>
-                            <span class="kpi-trend positive">▲ 92% tasa de cumplimiento</span>
+                            <span class="kpi-trend positive">92% tasa de cumplimiento</span>
                         </div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-icon-box purple">🚜</div>
+                        <div class="kpi-icon-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                                <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+                            </svg>
+                        </div>
                         <div class="kpi-data">
                             <span class="kpi-label">Total Maquinaria en Sistema</span>
                             <span class="kpi-value" id="kpi-total-tools">32 Equipos</span>
-                            <span class="kpi-trend neutral">● 26 Disponibles / 6 En Renta</span>
+                            <span class="kpi-trend neutral">26 Disponibles / 6 En Renta</span>
                         </div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-icon-box green">⏱️</div>
+                        <div class="kpi-icon-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
                         <div class="kpi-data">
                             <span class="kpi-label">Tasa de Ocupación Flota</span>
                             <span class="kpi-value" id="kpi-occupancy">81.2%</span>
-                            <span class="kpi-trend positive">▲ +5.1% semana actual</span>
+                            <span class="kpi-trend positive">+5.1% semana actual</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Gráficos Interactivos de Negocio -->
+                <!-- Gráficos de Negocio -->
                 <div class="charts-grid">
-                    <!-- Gráfico 1: Ingresos por Categoría -->
                     <div class="glass-card chart-card">
                         <div class="chart-header">
                             <div>
                                 <h3 class="chart-title">Distribución de Ingresos por Categoría</h3>
-                                <p class="chart-sub">Millones de COP generados en los últimos 30 días</p>
+                                <p class="chart-sub">Facturación consolidada (Millones de COP)</p>
                             </div>
-                            <span class="chart-tag">Datos Live</span>
+                            <span class="chart-tag">Últimos 30 días</span>
                         </div>
                         <div class="bar-chart-container" id="bar-chart-container">
-                            <!-- Barras generadas dinámicamente con CSS y SVG -->
+                            <!-- Inyectado vía JS -->
                         </div>
                     </div>
 
-                    <!-- Gráfico 2: Estado del Parque de Maquinaria -->
                     <div class="glass-card chart-card">
                         <div class="chart-header">
                             <div>
                                 <h3 class="chart-title">Estado de la Flota Industrial</h3>
-                                <p class="chart-sub">Proporción de disponibilidad y mantenimiento</p>
+                                <p class="chart-sub">Disponibilidad en tiempo real</p>
                             </div>
-                            <span class="chart-tag">Tiempo Real</span>
+                            <span class="chart-tag">Flota Activa</span>
                         </div>
                         <div class="donut-chart-container">
                             <svg class="donut-svg" viewBox="0 0 200 200" id="donut-chart-svg">
@@ -621,9 +427,9 @@
                                 <circle cx="100" cy="100" r="75" class="donut-segment segment-maint" id="donut-seg-maint" />
                             </svg>
                             <div class="donut-legend">
-                                <div class="legend-row"><span class="dot dot-available"></span> Disponible: <strong id="pct-available">78%</strong></div>
-                                <div class="legend-row"><span class="dot dot-rented"></span> En Renta: <strong id="pct-rented">16%</strong></div>
-                                <div class="legend-row"><span class="dot dot-maint"></span> Mantenimiento: <strong id="pct-maint">6%</strong></div>
+                                <div class="legend-row"><span><span class="dot dot-available"></span> Disponible</span> <strong id="pct-available">78%</strong></div>
+                                <div class="legend-row"><span><span class="dot dot-rented"></span> En Renta</span> <strong id="pct-rented">16%</strong></div>
+                                <div class="legend-row"><span><span class="dot dot-maint"></span> Mantenimiento</span> <strong id="pct-maint">6%</strong></div>
                             </div>
                         </div>
                     </div>
@@ -632,13 +438,12 @@
 
         </main>
 
-
         <!-- FOOTER ELEGANTE -->
         <footer class="app-footer">
             <div class="footer-inner">
                 <div class="footer-col">
                     <span class="footer-brand">RentaTools <strong>PRO</strong></span>
-                    <p class="footer-desc">Solución de ingeniería para la gestión, reserva y trazabilidad de maquinaria de construcción pesada y herramientas certificadas.</p>
+                    <p class="footer-desc">Solución de ingeniería para la gestión, reserva y trazabilidad de maquinaria de construcción pesada y equipos certificados.</p>
                 </div>
                 <div class="footer-col">
                     <span class="footer-title">Arquitectura del Proyecto</span>
@@ -646,7 +451,7 @@
                         <li><span>Arquitectura Hexagonal (DDD)</span></li>
                         <li><span>Spring Boot 3 + Java 21</span></li>
                         <li><span>Seguridad Stateless JWT</span></li>
-                        <li><span>Flyway 4FN PostgreSQL / H2</span></li>
+                        <li><span>PostgreSQL / H2 Database</span></li>
                     </ul>
                 </div>
                 <div class="footer-col">
@@ -664,7 +469,6 @@
         </footer>
     </div>
 
-
     <!-- ================================================================= -->
     <!-- MODAL 1: CHECKOUT & RESERVA DE MAQUINARIA                         -->
     <!-- ================================================================= -->
@@ -679,13 +483,15 @@
             <div class="modal-body">
                 <!-- Resumen del Equipo Seleccionado -->
                 <div class="tool-summary-card">
-                    <div class="tool-summary-icon" id="res-tool-icon"><img src="assets/images/tools/cat-420f2-excavator.jpg" alt="Equipo seleccionado" class="tool-summary-photo"></div>
+                    <div class="tool-summary-icon" id="res-tool-icon">
+                        <img src="assets/images/tools/cat-420f2-excavator.jpg" alt="Equipo seleccionado" class="tool-summary-photo">
+                    </div>
                     <div class="tool-summary-meta">
                         <h4 id="res-tool-name" class="tool-summary-title">Retroexcavadora CAT 420F2</h4>
                         <span id="res-tool-specs" class="tool-summary-specs">Potencia: 93 HP • Capacidad: 1.0 m³</span>
                         <div class="tool-summary-pricing">
-                            <span class="price-pill" id="res-tool-rate">$ 420.000 / día</span>
-                            <span class="deposit-pill" id="res-tool-deposit">Depósito: $ 1.500.000</span>
+                            <span id="res-tool-rate">$ 420.000 / día</span>
+                            <span id="res-tool-deposit">Depósito: $ 1.500.000</span>
                         </div>
                     </div>
                 </div>
@@ -729,21 +535,20 @@
                         </div>
                         <div class="breakdown-row total-row">
                             <span>Total a Liquidar:</span>
-                            <strong id="calc-total" class="text-gold">$ 1.920.000 COP</strong>
+                            <strong id="calc-total">$ 1.920.000 COP</strong>
                         </div>
                     </div>
 
                     <div class="modal-actions">
                         <button type="button" class="btn-secondary" id="btn-cancel-reservation">Cancelar</button>
                         <button type="submit" class="btn-primary" id="btn-confirm-reservation">
-                            <span>⚡</span> Generar Solicitud de Reserva
+                            Confirmar Solicitud
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
 
     <!-- ================================================================= -->
     <!-- MODAL 2: AUTENTICACIÓN (LOGIN & REGISTRO)                         -->
@@ -759,11 +564,11 @@
 
             <!-- Botones de Acceso Rápido para Demostración -->
             <div class="demo-credentials-helper">
-                <span class="helper-label">Accesos rápidos para evaluación:</span>
+                <span class="helper-label">Accesos rápidos para demostración:</span>
                 <div class="helper-buttons">
-                    <button type="button" class="btn-quick-fill" data-email="cliente@rentatools.com" data-role="CLIENT">👷 Cliente</button>
-                    <button type="button" class="btn-quick-fill" data-email="proveedor@rentatools.com" data-role="PROVIDER">🚜 Proveedor</button>
-                    <button type="button" class="btn-quick-fill" data-email="admin@rentatools.com" data-role="ADMIN">🛡️ Admin</button>
+                    <button type="button" class="btn-quick-fill" data-email="cliente@rentatools.com" data-role="CLIENT">Cliente</button>
+                    <button type="button" class="btn-quick-fill" data-email="proveedor@rentatools.com" data-role="PROVIDER">Proveedor</button>
+                    <button type="button" class="btn-quick-fill" data-email="admin@rentatools.com" data-role="ADMIN">Admin</button>
                 </div>
             </div>
 
@@ -800,7 +605,7 @@
                     </select>
                 </div>
                 <div class="form-field">
-                    <label for="reg-password">Contraseña Segura *</label>
+                    <label for="reg-password">Contraseña *</label>
                     <input type="password" id="reg-password" required placeholder="Mínimo 8 caracteres">
                 </div>
                 <button type="submit" class="btn-primary w-full" id="btn-submit-register">
@@ -809,7 +614,6 @@
             </form>
         </div>
     </div>
-
 
     <!-- ================================================================= -->
     <!-- MODAL 3: VISOR DE CONTRATO / ACTA PDF                             -->
@@ -828,12 +632,11 @@
             </div>
 
             <div class="contract-actions">
-                <button class="btn-secondary" id="btn-print-contract">🖨️ Imprimir / Guardar</button>
+                <button class="btn-secondary" id="btn-print-contract">Imprimir / Guardar</button>
                 <button class="btn-primary" id="btn-close-contract-view">Cerrar Visor</button>
             </div>
         </div>
     </div>
-
 
     <!-- ================================================================= -->
     <!-- CONTENEDOR FLOTANTE DE NOTIFICACIONES (TOASTS)                   -->
@@ -841,7 +644,6 @@
     <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
     <!-- Scripts de la Aplicación -->
-    <script src="intro.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
