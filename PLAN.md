@@ -94,7 +94,13 @@ Antes: leer completo el resto de la guía Security + JWT.
 - [x] Matriz actualizada, commit
 
 ## Fase 10 — Documentación y revisión final
-- [ ] `README.md`, `COMPILACION.md`, `DESPLIEGUE.md` (Docker y Tomcat/WAR)
-- [ ] Auditoría: cada guía y cada repo con evidencia (archivo y línea)
-- [ ] Reporte final basado en la matriz: hecho y verificado, pendiente, qué mejoraría un senior
-- [ ] Commit final y push
+- [x] `README.md` exhaustivo y profesional en la raíz del proyecto (arquitectura, stack, base de datos 4FN, endpoints, usuarios de prueba, guía de inicio rápido)
+- [x] `docs/COMPILACION.md` detallado (JDK 21, comandos Maven, empaquetado JAR/WAR, árbol de dependencias, resolución de problemas)
+- [x] `docs/DESPLIEGUE.md` completo (Docker Compose multi-servicio, despliegue tradicional WAR en Tomcat 10+, servicio systemd, backups)
+- [x] Soporte de despliegue dual: `RentaToolsApplication.java` extiende `SpringBootServletInitializer` para compatibilidad con contenedores de servlets externos
+- [x] Especificaciones OpenAPI 3.0 generadas y exportadas en `docs/api/openapi.json` y `docs/api/openapi.yaml`
+- [x] Auditoría completa con trazabilidad de requisitos (Tabla A) y conceptos evaluados (Tabla B) en `docs/MATRIZ_CUMPLIMIENTO.md` (100% verificado con líneas y archivos)
+- [x] Guía de estudio y preguntas de examen oral de sustentación actualizadas para las 11 fases en `docs/APRENDIZAJE.md`
+- [x] `mvn clean test` y `mvn clean package` ejecutados con 100% de pruebas en verde y build exitoso
+- [x] Commit final y push a repositorio remoto en GitHub
+

@@ -1,0 +1,665 @@
+openapi: 3.0.3
+info:
+  title: "Plataforma de Renta de Herramientas y Equipos de Construcción — API"
+  description: "API REST para la gestión integral de alquiler de maquinaria pesada y herramientas de construcción, inventarios, reservas y pagos electrónicos (Arquitectura Hexagonal + DDD)."
+  contact:
+    name: "Julián Andrés Ricaurte"
+    email: "andreyricaurte10@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "https://www.apache.org/licenses/LICENSE-2.0"
+  version: "1.0.0"
+
+servers:
+  - url: "http://localhost:8080"
+    description: "Servidor de Desarrollo Local"
+
+security:
+  - Bearer Authentication: []
+
+paths:
+  /api/auth/login:
+    post:
+      tags:
+        - "Autenticación"
+      summary: "Iniciar sesión y obtener tokens JWT"
+      description: "Autentica a un usuario registrado mediante correo y contraseña, emitiendo un Access Token de 15 minutos y un Refresh Token de 7 días."
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        200:
+          description: "Sesión iniciada exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        401:
+          description: "Credenciales inválidas"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /api/auth/refresh:
+    post:
+      tags:
+        - "Autenticación"
+      summary: "Renovar token de acceso"
+      description: "Permite renovar el access token expirado enviando un refresh token válido."
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        200:
+          description: "Token renovado exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshTokenResponse"
+        401:
+          description: "Refresh token expirado o inválido"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /api/users:
+    post:
+      tags:
+        - "Identidad y Usuarios"
+      summary: "Registrar nuevo usuario"
+      description: "Crea una cuenta en la plataforma con rol CLIENT, PROVIDER o ADMIN. La contraseña se almacena cifrada con BCrypt."
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterUserRequest"
+      responses:
+        201:
+          description: "Usuario registrado exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+        409:
+          description: "El correo ya se encuentra registrado"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /api/users/{id}:
+    get:
+      tags:
+        - "Identidad y Usuarios"
+      summary: "Consultar perfil de usuario por ID"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Identificador único (UUID) del usuario"
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: "Perfil encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDto"
+        404:
+          description: "Usuario no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /api/tools:
+    get:
+      tags:
+        - "Catálogo de Maquinaria"
+      summary: "Listar herramientas y equipos del catálogo"
+      description: "Devuelve las herramientas disponibles en la plataforma. Permite filtrar por identificador de categoría."
+      security: []
+      parameters:
+        - name: categoryId
+          in: query
+          required: false
+          description: "UUID opcional de la categoría industrial"
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: "Listado de maquinaria"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ToolDto"
+    post:
+      tags:
+        - "Catálogo de Maquinaria"
+      summary: "Registrar nueva herramienta o equipo pesado"
+      description: "Registra una nueva maquinaria en el catálogo asociada a un proveedor."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterToolRequest"
+      responses:
+        201:
+          description: "Herramienta registrada exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToolDto"
+        409:
+          description: "Código de herramienta duplicado"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /api/tools/{id}:
+    get:
+      tags:
+        - "Catálogo de Maquinaria"
+      summary: "Consultar detalle de una herramienta por ID"
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: "Detalle de herramienta"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToolDto"
+        404:
+          description: "Herramienta no encontrada"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /api/reservations:
+    post:
+      tags:
+        - "Reservas y Alquileres"
+      summary: "Crear una nueva reserva de equipo"
+      description: "Crea una solicitud de alquiler en estado PENDING validando fechas y tarifas diarias."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReservationRequest"
+      responses:
+        201:
+          description: "Reserva creada exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReservationDto"
+        400:
+          description: "Datos de reserva inválidos"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /api/reservations/{id}:
+    get:
+      tags:
+        - "Reservas y Alquileres"
+      summary: "Consultar reserva por ID"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: "Reserva encontrada"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReservationDto"
+        404:
+          description: "Reserva no encontrada"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /api/reservations/{id}/confirm:
+    put:
+      tags:
+        - "Reservas y Alquileres"
+      summary: "Confirmar reserva y emitir evento de dominio"
+      description: "Transiciona la reserva a CONFIRMED y dispara el evento ReservationConfirmed."
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: "Reserva confirmada exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReservationDto"
+        404:
+          description: "Reserva no encontrada"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /api/payments:
+    post:
+      tags:
+        - "Facturación y Pagos"
+      summary: "Procesar pago de alquiler"
+      description: "Procesa un pago en línea (pasarela simulada) para una reserva activa y genera recibo/factura."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcessPaymentRequest"
+      responses:
+        201:
+          description: "Pago procesado exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentDto"
+        400:
+          description: "Parámetros de pago inválidos"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /api/payments/{id}:
+    get:
+      tags:
+        - "Facturación y Pagos"
+      summary: "Consultar detalle de un pago por ID"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: "Detalle del pago"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentDto"
+        404:
+          description: "Pago no encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+
+  /api/reports/metrics:
+    get:
+      tags:
+        - "Reportes e Inteligencia de Negocios"
+      summary: "Obtener métricas consolidadas del sistema (KPIs de BI)"
+      description: "Devuelve estadísticas de maquinaria disponible, en alquiler, ingresos brutos facturados y reservas activas."
+      responses:
+        200:
+          description: "Métricas del sistema"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemMetricsReportDto"
+
+components:
+  securitySchemes:
+    Bearer Authentication:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Ingrese el token JWT con prefijo Bearer para autenticar las peticiones."
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "admin@rentatools.com"
+        password:
+          type: string
+          format: password
+          example: "Admin123456!"
+
+    LoginResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        email:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+          example: ["ADMIN"]
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+          example: "Bearer"
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiJ9..."
+
+    RefreshTokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+          example: "Bearer"
+
+    RegisterUserRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+          example: "cliente.nuevo@ejemplo.com"
+        password:
+          type: string
+          example: "ClaveSegura123!"
+        firstName:
+          type: string
+          example: "Carlos"
+        lastName:
+          type: string
+          example: "Gómez"
+        role:
+          type: string
+          enum: [ADMIN, PROVIDER, CLIENT]
+          example: "CLIENT"
+
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+        active:
+          type: boolean
+
+    RegisterToolRequest:
+      type: object
+      required:
+        - providerId
+        - categoryId
+        - code
+        - name
+        - dailyRentalRate
+        - securityDeposit
+        - replacementValue
+      properties:
+        providerId:
+          type: string
+          format: uuid
+        categoryId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: "EXC-CAT-320D"
+        name:
+          type: string
+          example: "Excavadora Oruga Caterpillar 320D"
+        description:
+          type: string
+          example: "Excavadora hidráulica de alto tonelaje para excavaciones profundas"
+        brand:
+          type: string
+          example: "Caterpillar"
+        model:
+          type: string
+          example: "320D"
+        dailyRentalRate:
+          type: number
+          example: 850000.00
+        securityDeposit:
+          type: number
+          example: 2500000.00
+        replacementValue:
+          type: number
+          example: 180000000.00
+
+    ToolDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        providerId:
+          type: string
+          format: uuid
+        categoryId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+        dailyRentalRate:
+          type: number
+        securityDeposit:
+          type: number
+        replacementValue:
+          type: number
+        status:
+          type: string
+          example: "AVAILABLE"
+        active:
+          type: boolean
+
+    CreateReservationRequest:
+      type: object
+      required:
+        - clientId
+        - toolId
+        - startDate
+        - endDate
+        - dailyRate
+        - depositAmount
+      properties:
+        clientId:
+          type: string
+          format: uuid
+        toolId:
+          type: string
+          format: uuid
+        startDate:
+          type: string
+          format: date
+          example: "2026-11-01"
+        endDate:
+          type: string
+          format: date
+          example: "2026-11-07"
+        dailyRate:
+          type: number
+          example: 850000.00
+        depositAmount:
+          type: number
+          example: 2500000.00
+
+    ReservationDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+          format: uuid
+        toolId:
+          type: string
+          format: uuid
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        dailyRate:
+          type: number
+        depositAmount:
+          type: number
+        status:
+          type: string
+          example: "PENDING"
+
+    ProcessPaymentRequest:
+      type: object
+      required:
+        - reservationId
+        - paymentMethod
+        - amount
+      properties:
+        reservationId:
+          type: string
+          format: uuid
+        paymentMethod:
+          type: string
+          example: "CREDIT_CARD"
+        amount:
+          type: number
+          example: 7600000.00
+
+    PaymentDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reservationId:
+          type: string
+          format: uuid
+        amount:
+          type: number
+        paymentMethod:
+          type: string
+        status:
+          type: string
+          example: "COMPLETED"
+
+    SystemMetricsReportDto:
+      type: object
+      properties:
+        totalTools:
+          type: integer
+          example: 24
+        availableTools:
+          type: integer
+          example: 18
+        rentedTools:
+          type: integer
+          example: 5
+        maintenanceTools:
+          type: integer
+          example: 1
+        activeReservations:
+          type: integer
+          example: 6
+        grossRevenue:
+          type: number
+          example: 48500000.00
+
+    ApiErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: "Not Found"
+        message:
+          type: string
+          example: "Recurso no encontrado"
+        path:
+          type: string
+          example: "/api/tools/123e4567-e89b-12d3-a456-426614174000"
