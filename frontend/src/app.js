@@ -27,7 +27,7 @@
             pricePerDay: 420000,
             depositAmount: 1500000,
             status: 'AVAILABLE',
-            icon: '🚜',
+            image: 'assets/images/tools/cat-420f2-excavator.jpg',
             serialNumber: 'CAT-2024-X812',
             specs: ['Potencia neta: 93 HP (69 kW)', 'Capacidad balde: 1.0 m³', 'Profundidad de excavación: 4.36 m', 'Motor diésel turboalimentado']
         },
@@ -40,7 +40,7 @@
             pricePerDay: 135000,
             depositAmount: 600000,
             status: 'AVAILABLE',
-            icon: '🔨',
+            image: 'assets/images/tools/bosch-gsh27-jackhammer.jpg',
             serialNumber: 'BSH-DEM-0941',
             specs: ['Energía de impacto: 62 Joules', 'Potencia absorbida: 2000 W', 'Tasa de impacto: 1000 bpm', 'Vibración reducida 8.5 m/s²']
         },
@@ -53,7 +53,7 @@
             pricePerDay: 380000,
             depositAmount: 1800000,
             status: 'AVAILABLE',
-            icon: '🔋',
+            image: 'assets/images/tools/cummins-generator-100kva.jpg',
             serialNumber: 'CUM-GEN-552',
             specs: ['Salida continua: 80 kW / 100 kVA', 'Voltaje: 220V / 440V Trifásico', 'Tanque de combustible: 240 L', 'Nivel de ruido: 68 dB a 7m']
         },
@@ -66,7 +66,7 @@
             pricePerDay: 310000,
             depositAmount: 1200000,
             status: 'AVAILABLE',
-            icon: '🚜',
+            image: 'assets/images/tools/bobcat-s570-skidsteer.jpg',
             serialNumber: 'BOB-S570-881',
             specs: ['Carga nominal operativa: 885 kg', 'Potencia: 61 HP', 'Altura de volteo: 3.02 m', 'Cabina con aire acondicionado']
         },
@@ -79,7 +79,7 @@
             pricePerDay: 85000,
             depositAmount: 400000,
             status: 'AVAILABLE',
-            icon: '🧱',
+            image: 'assets/images/tools/imer-concrete-mixer.jpg',
             serialNumber: 'IMR-CON-302',
             specs: ['Capacidad de mezcla: 350 Litros (2 sacos)', 'Motor: Yanmar Diésel 9 HP', 'Chasis de tiro reforzado', 'Tambor de acero de alta resistencia']
         },
@@ -92,7 +92,7 @@
             pricePerDay: 260000,
             depositAmount: 1000000,
             status: 'AVAILABLE',
-            icon: '🏗️',
+            image: 'assets/images/tools/genie-scissor-lift.jpg',
             serialNumber: 'GEN-TJR-741',
             specs: ['Altura de trabajo: 9.92 m', 'Capacidad de carga: 454 kg (2 operarios)', 'Neumáticos no marcantes para interior', 'Extensión de plataforma 0.91 m']
         },
@@ -105,7 +105,7 @@
             pricePerDay: 240000,
             depositAmount: 900000,
             status: 'RENTED',
-            icon: '🚜',
+            image: 'assets/images/tools/vibromak-road-roller.jpg',
             serialNumber: 'BMG-ROD-119',
             specs: ['Peso operativo: 1540 kg', 'Fuerza centrífuga: 25 kN', 'Doble tambor tándem hidrostático', 'Rociador de agua presurizado']
         },
@@ -118,7 +118,7 @@
             pricePerDay: 195000,
             depositAmount: 750000,
             status: 'MAINTENANCE',
-            icon: '💡',
+            image: 'assets/images/tools/doosan-light-tower.jpg',
             serialNumber: 'DOO-LGT-612',
             specs: ['Luminarias: 4 x 350W LED de alto flujo', 'Mástil telescópico: 8.5 metros', 'Autonomía: 60 horas continuas', 'Remolcable en carretera']
         }
@@ -130,7 +130,7 @@
             id: 'RES-2026-901',
             toolId: 'tool-007',
             toolName: 'Rodillo Compactador Vibromak 1.5 Ton',
-            toolIcon: '🚜',
+            toolImage: 'assets/images/tools/vibromak-road-roller.jpg',
             startDate: '2026-10-12',
             endDate: '2026-10-18',
             days: 6,
@@ -260,7 +260,7 @@
                 pricePerDay: bt.pricePerDay || 200000,
                 depositAmount: bt.depositAmount || 800000,
                 status: bt.status || 'AVAILABLE',
-                icon: bt.category === 'DEMOLITION' ? '🔨' : '🚜',
+                image: bt.imageUrl || 'assets/images/tools/cat-420f2-excavator.jpg',
                 serialNumber: bt.serialNumber || 'SN-2026',
                 specs: bt.specs || ['Equipo certificado', 'Inspección técnica al día']
             }));
@@ -337,7 +337,7 @@
                     </div>
 
                     <div class="tool-visual-box">
-                        <span class="tool-vector-icon">${tool.icon}</span>
+                        <img class="tool-photo" src="${tool.image}" alt="${tool.name}" loading="lazy">
                     </div>
 
                     <div class="tool-info-body">
@@ -382,7 +382,7 @@
         state.selectedToolForReservation = tool;
 
         // Llenar vista previa del equipo
-        document.getElementById('res-tool-icon').textContent = tool.icon;
+        document.getElementById('res-tool-icon').innerHTML = `<img src="${tool.image}" alt="${tool.name}" class="tool-summary-photo">`;
         document.getElementById('res-tool-name').textContent = tool.name;
         document.getElementById('res-tool-specs').textContent = `${tool.brand} • Serie: ${tool.serialNumber}`;
         document.getElementById('res-tool-rate').textContent = `${currencyFormatter.format(tool.pricePerDay)} / día`;
@@ -444,7 +444,7 @@
             id: `RES-${Date.now().toString().slice(-4)}`,
             toolId: tool.id,
             toolName: tool.name,
-            toolIcon: tool.icon,
+            toolImage: tool.image,
             startDate: start,
             endDate: end,
             days: days,
@@ -565,7 +565,7 @@
                     </div>
 
                     <div class="rental-item-info">
-                        <div class="rental-item-icon">${res.toolIcon}</div>
+                        <div class="rental-item-icon"><img src="${res.toolImage}" alt="${res.toolName}" class="rental-item-photo"></div>
                         <div>
                             <h3 class="rental-item-name">${res.toolName}</h3>
                             <div class="rental-item-dates">📍 Entrega: ${res.siteAddress}</div>
@@ -682,6 +682,9 @@
 
         list.innerHTML = state.providerTools.map(tool => `
             <div class="provider-tool-item">
+                <div class="provider-tool-thumb">
+                    <img src="${tool.image}" alt="${tool.name}" class="provider-tool-photo">
+                </div>
                 <div class="provider-tool-meta">
                     <h4>${tool.name}</h4>
                     <span>${tool.brand} • ${currencyFormatter.format(tool.pricePerDay)}/día • Serie: ${tool.serialNumber}</span>
@@ -712,7 +715,7 @@
             pricePerDay: price,
             depositAmount: deposit,
             status: 'AVAILABLE',
-            icon: category === 'DEMOLITION' ? '🔨' : category === 'LIFTING' ? '🏗️' : '🚜',
+            image: category === 'DEMOLITION' ? 'assets/images/tools/bosch-gsh27-jackhammer.jpg' : category === 'LIFTING' ? 'assets/images/tools/genie-scissor-lift.jpg' : 'assets/images/tools/cat-420f2-excavator.jpg',
             serialNumber: serial,
             specs: specsText ? specsText.split(',').map(s => s.trim()) : ['Equipo verificado', 'Mantenimiento al día']
         };

@@ -280,16 +280,16 @@
                 <!-- Enlaces de Navegación -->
                 <nav class="app-nav" aria-label="Navegación Principal">
                     <button class="nav-tab active" data-target="section-catalog">
-                        <span class="nav-icon">🚜</span> Catálogo de Equipos
+                        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span> Catálogo de Equipos
                     </button>
                     <button class="nav-tab" data-target="section-client-rentals" id="tab-my-rentals">
-                        <span class="nav-icon">📋</span> Mis Alquileres <span class="badge-count" id="active-rentals-count">1</span>
+                        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg></span> Mis Alquileres <span class="badge-count" id="active-rentals-count">1</span>
                     </button>
                     <button class="nav-tab" data-target="section-provider" id="tab-provider">
-                        <span class="nav-icon">🛠️</span> Panel Proveedor
+                        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></span> Panel Proveedor
                     </button>
                     <button class="nav-tab" data-target="section-analytics" id="tab-analytics">
-                        <span class="nav-icon">📊</span> Métricas & BI
+                        <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span> Métricas &amp; BI
                     </button>
                 </nav>
 
@@ -297,8 +297,8 @@
                 <div class="role-selector-bar" title="Cambiar rol activo para demostración">
                     <span class="role-selector-label">VISTA ROL:</span>
                     <button class="role-chip active" data-role="CLIENT" id="role-client-btn">👷 Cliente</button>
-                    <button class="role-chip" data-role="PROVIDER" id="role-provider-btn">🚜 Proveedor</button>
-                    <button class="role-chip" data-role="ADMIN" id="role-admin-btn">🛡️ Admin</button>
+                    <button class="role-chip" data-role="PROVIDER" id="role-provider-btn">🏗 Proveedor</button>
+                    <button class="role-chip" data-role="ADMIN" id="role-admin-btn">🛡 Admin</button>
                 </div>
 
                 <!-- Acciones de Usuario & Autenticación -->
@@ -459,7 +459,7 @@
             <section id="section-provider" class="content-section">
                 <div class="section-header">
                     <div>
-                        <h2 class="section-title">🚜 Portal del Proveedor de Maquinaria</h2>
+                        <h2 class="section-title">🏗 Portal del Proveedor de Maquinaria</h2>
                         <p class="section-desc">Publica equipos en renta, gestiona el inventario de tu parque automotor y maximiza tu rentabilidad.</p>
                     </div>
                     <div class="provider-earnings-badge">
@@ -544,7 +544,7 @@
             <section id="section-analytics" class="content-section">
                 <div class="section-header">
                     <div>
-                        <h2 class="section-title">📊 Tablero Ejecutivo de Analítica & Negocio</h2>
+                        <h2 class="section-title"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" style="vertical-align: -3px; margin-right: 6px;"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Tablero Ejecutivo de Analítica &amp; Negocio</h2>
                         <p class="section-desc">Métricas operativas del backend (`/api/reports/metrics`), rendimiento de facturación y ocupación.</p>
                     </div>
                     <button class="btn-secondary" id="btn-download-pdf-report">
@@ -679,7 +679,7 @@
             <div class="modal-body">
                 <!-- Resumen del Equipo Seleccionado -->
                 <div class="tool-summary-card">
-                    <div class="tool-summary-icon" id="res-tool-icon">🚜</div>
+                    <div class="tool-summary-icon" id="res-tool-icon"><img src="assets/images/tools/cat-420f2-excavator.jpg" alt="Equipo seleccionado" class="tool-summary-photo"></div>
                     <div class="tool-summary-meta">
                         <h4 id="res-tool-name" class="tool-summary-title">Retroexcavadora CAT 420F2</h4>
                         <span id="res-tool-specs" class="tool-summary-specs">Potencia: 93 HP • Capacidad: 1.0 m³</span>
