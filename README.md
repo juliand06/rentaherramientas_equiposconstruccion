@@ -285,8 +285,8 @@ mvn clean test
 
 - [Guía de Compilación](docs/COMPILACION.md) — Requisitos, comandos Maven, empaquetado JAR/WAR y resolución de incidencias.
 - [Guía de Despliegue](docs/DESPLIEGUE.md) — Configuración para Docker Compose, Tomcat 10+ y servicios systemd.
-- [Matriz de Cumplimiento](docs/MATRIZ_CUMPLIMIENTO.md) — Matriz de trazabilidad de requisitos y conceptos evaluados.
-- [Registro de Decisiones (ADR)](docs/DECISIONES.md) — Decisiones arquitecturales y justificaciones técnicas.
-- [Guía de Aprendizaje](docs/APRENDIZAJE.md) — Conceptos clave por fase, preguntas de sustentación y errores evitados.
 - [Diccionario de Datos](docs/database/diccionario-datos.md) — Detalle de las 22 tablas en 4FN y tipos de datos.
+- [Diagrama Entidad-Relación](docs/database/diagrama-er.svg) — Modelo relacional completo en SVG.
 - [Colección Postman](docs/postman/) — Colección de requests y ambiente preconfigurado para pruebas de API.
+- [Especificación OpenAPI (Swagger)](docs/api/) — Contratos REST en formato JSON y YAML.
+

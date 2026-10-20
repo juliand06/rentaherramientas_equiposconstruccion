@@ -756,6 +756,11 @@
         renderAnalytics();
     }
 
+    // Instancias de Chart.js
+    let barChartInstance = null;
+    let donutChartInstance = null;
+    let regionalChartInstance = null;
+
     function renderAnalytics() {
         const kpiRev = document.getElementById('kpi-revenue');
         const kpiRentals = document.getElementById('kpi-active-rentals');
@@ -767,38 +772,7 @@
         if (kpiTools) kpiTools.textContent = `${state.metrics.totalTools} Equipos`;
         if (kpiOcc) kpiOcc.textContent = `${state.metrics.occupancyRate}%`;
 
-        // 1. Gráfico de Barras Estructurado y Visible
-        const barContainer = document.getElementById('bar-chart-container');
-        if (barContainer) {
-            const maxAmount = Math.max(...state.metrics.categoriesRevenue.map(c => c.amount));
-            barContainer.innerHTML = `
-                <div class="bar-chart-visual">
-                    <div class="bar-chart-gridlines">
-                        <div class="bar-gridline"><span class="grid-val">$20M</span></div>
-                        <div class="bar-gridline"><span class="grid-val">$15M</span></div>
-                        <div class="bar-gridline"><span class="grid-val">$10M</span></div>
-                        <div class="bar-gridline"><span class="grid-val">$5M</span></div>
-                        <div class="bar-gridline"><span class="grid-val">$0</span></div>
-                    </div>
-                    <div class="bar-chart-columns">
-                        ${state.metrics.categoriesRevenue.map(c => {
-                            const heightPct = Math.round((c.amount / maxAmount) * 88);
-                            return `
-                                <div class="bar-column-item" title="${c.category}: ${currencyFormatter.format(c.amount)} COP">
-                                    <div class="bar-column-val-tag">${(c.amount / 1000000).toFixed(1)}M</div>
-                                    <div class="bar-column-track">
-                                        <div class="bar-column-fill" style="height: ${heightPct}%;"></div>
-                                    </div>
-                                    <span class="bar-column-label">${c.category}</span>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        // 2. Gráfico Donut de Flota en Santander con Cálculo Dinámico
+        // Donut stats overlay y leyenda
         const total = 32;
         const available = 25;
         const rented = 5;
@@ -811,54 +785,209 @@
         const elPctAvail = document.getElementById('pct-available');
         const elPctRent = document.getElementById('pct-rented');
         const elPctMaint = document.getElementById('pct-maint');
-        if (elPctAvail) elPctAvail.textContent = `${pctAvail}% (${available} eq)`;
-        if (elPctRent) elPctRent.textContent = `${pctRent}% (${rented} eq)`;
-        if (elPctMaint) elPctMaint.textContent = `${pctMaint}% (${maint} eq)`;
+        if (elPctAvail) elPctAvail.textContent = `${pctAvail}% (${available})`;
+        if (elPctRent) elPctRent.textContent = `${pctRent}% (${rented})`;
+        if (elPctMaint) elPctMaint.textContent = `${pctMaint}% (${maint})`;
 
-        // Circunferencia para radio r=65: 2 * PI * 65 = 408.4
-        const circumference = 408.4;
-        const strokeAvail = (pctAvail / 100) * circumference;
-        const strokeRent = (pctRent / 100) * circumference;
-        const strokeMaint = (pctMaint / 100) * circumference;
+        const donutTotalEl = document.getElementById('donut-stat-total');
+        if (donutTotalEl) donutTotalEl.textContent = total;
 
-        const segAvail = document.getElementById('donut-seg-available');
-        const segRent = document.getElementById('donut-seg-rented');
-        const segMaint = document.getElementById('donut-seg-maint');
-
-        if (segAvail) {
-            segAvail.style.strokeDasharray = `${strokeAvail} ${circumference}`;
-            segAvail.style.strokeDashoffset = '0';
+        // Renderizado interactivo con Chart.js
+        if (typeof Chart !== 'undefined') {
+            renderChartJsAnalytics();
         }
-        if (segRent) {
-            segRent.style.strokeDasharray = `${strokeRent} ${circumference}`;
-            segRent.style.strokeDashoffset = `-${strokeAvail}`;
-        }
-        if (segMaint) {
-            segMaint.style.strokeDasharray = `${strokeMaint} ${circumference}`;
-            segMaint.style.strokeDashoffset = `-${strokeAvail + strokeRent}`;
+    }
+
+    function renderChartJsAnalytics() {
+        // 1. Gráfico de Barras: Facturación por Categoría
+        const ctxBar = document.getElementById('bar-chart-canvas');
+        if (ctxBar) {
+            if (barChartInstance) barChartInstance.destroy();
+
+            const categories = state.metrics.categoriesRevenue || [];
+            const labels = categories.map(c => c.category);
+            const dataAmounts = categories.map(c => c.amount);
+
+            barChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Facturación Consolidada',
+                        data: dataAmounts,
+                        backgroundColor: [
+                            'rgba(15, 23, 42, 0.90)',
+                            'rgba(30, 41, 59, 0.85)',
+                            'rgba(51, 65, 85, 0.85)',
+                            'rgba(71, 85, 105, 0.85)',
+                            'rgba(100, 116, 139, 0.85)'
+                        ],
+                        hoverBackgroundColor: '#0f172a',
+                        borderWidth: 1,
+                        borderColor: '#cbd5e1',
+                        borderRadius: 6,
+                        maxBarThickness: 54
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 600 },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: 'Inter', size: 12, weight: '700' },
+                            bodyFont: { family: 'Inter', size: 12 },
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Facturación: ${currencyFormatter.format(context.raw)} COP`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + (value / 1000000).toFixed(0) + 'M';
+                                },
+                                font: { family: 'Inter', size: 11, weight: '500' },
+                                color: '#64748b'
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: 'Inter', size: 11, weight: '600' },
+                                color: '#334155'
+                            }
+                        }
+                    }
+                }
+            });
         }
 
-        // 3. Distribución Regional de Despacho en Santander
-        const regionalContainer = document.getElementById('santander-regional-bars');
-        if (regionalContainer) {
-            const regionalData = [
-                { area: 'Bucaramanga (Cabecera, Centro, Provenza)', pct: 42, rev: '$ 20.4M', tools: '6 en obra' },
-                { area: 'Floridablanca (Cañaveral, Menzuly, Ruitoque)', pct: 28, rev: '$ 13.6M', tools: '4 en obra' },
-                { area: 'Girón (Zona Industrial Chimitá, Anillo Vial)', pct: 18, rev: '$ 8.7M', tools: '3 en obra' },
-                { area: 'Piedecuesta & Lebrija (Guatiguará, Palonegro)', pct: 12, rev: '$ 6.0M', tools: '1 en obra' }
-            ];
+        // 2. Gráfico Donut: Estado de la Flota Santander
+        const ctxDonut = document.getElementById('donut-chart-canvas');
+        if (ctxDonut) {
+            if (donutChartInstance) donutChartInstance.destroy();
 
-            regionalContainer.innerHTML = regionalData.map(r => `
-                <div class="regional-bar-row">
-                    <div class="regional-bar-header">
-                        <span class="regional-bar-title">${r.area}</span>
-                        <span class="regional-bar-meta"><strong>${r.rev}</strong> • ${r.tools} (${r.pct}%)</span>
-                    </div>
-                    <div class="regional-bar-track">
-                        <div class="regional-bar-progress" style="width: ${r.pct}%;"></div>
-                    </div>
-                </div>
-            `).join('');
+            donutChartInstance = new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Disponible en Patio', 'En Renta Activa', 'Mantenimiento Preventivo'],
+                    datasets: [{
+                        data: [25, 5, 2],
+                        backgroundColor: ['#10b981', '#f59e0b', '#64748b'],
+                        hoverBackgroundColor: ['#059669', '#d97706', '#475569'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    animation: { duration: 600 },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: 'Inter', size: 12, weight: '700' },
+                            bodyFont: { family: 'Inter', size: 12 },
+                            padding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    const total = 32;
+                                    const pct = Math.round((context.raw / total) * 100);
+                                    return ` ${context.label}: ${context.raw} equipos (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 3. Gráfico Horizontal: Actividad por Municipio en Santander
+        const ctxRegional = document.getElementById('regional-chart-canvas');
+        if (ctxRegional) {
+            if (regionalChartInstance) regionalChartInstance.destroy();
+
+            regionalChartInstance = new Chart(ctxRegional, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        'Bucaramanga (Cabecera / Centro)',
+                        'Floridablanca (Cañaveral / Ruitoque)',
+                        'Girón (Chimitá / Anillo Vial)',
+                        'Piedecuesta & Lebrija'
+                    ],
+                    datasets: [{
+                        label: 'Facturación Regional ($COP)',
+                        data: [20.4, 13.6, 8.7, 6.0],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.85)',
+                            'rgba(2, 132, 199, 0.85)',
+                            'rgba(15, 23, 42, 0.85)',
+                            'rgba(100, 116, 139, 0.85)'
+                        ],
+                        hoverBackgroundColor: [
+                            '#059669',
+                            '#0284c7',
+                            '#0f172a',
+                            '#475569'
+                        ],
+                        borderRadius: 4,
+                        maxBarThickness: 24
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 600 },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: 'Inter', size: 12, weight: '700' },
+                            bodyFont: { family: 'Inter', size: 12 },
+                            padding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    const tools = ['6 maquinaria en obra (42%)', '4 maquinaria en obra (28%)', '3 maquinaria en obra (18%)', '1 maquinaria en obra (12%)'];
+                                    return ` Facturación: $${context.raw}M COP • ${tools[context.dataIndex]}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                callback: function(val) { return '$' + val + 'M'; },
+                                font: { family: 'Inter', size: 11, weight: '500' },
+                                color: '#64748b'
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: 'Inter', size: 11, weight: '600' },
+                                color: '#334155'
+                            }
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -926,6 +1055,14 @@
         // Trigger updates depending on section
         if (targetSectionId === 'section-analytics') {
             renderAnalytics();
+        } else if (targetSectionId === 'section-coverage') {
+            setTimeout(() => {
+                if (geofenceMap) {
+                    geofenceMap.invalidateSize();
+                } else {
+                    initGeofenceMap();
+                }
+            }, 150);
         } else if (targetSectionId === 'section-provider') {
             renderProviderPanel();
         } else if (targetSectionId === 'section-client-rentals') {
@@ -1185,76 +1322,302 @@
         setupGeofenceValidator();
     }
 
+    // =========================================================================
+    // CERCA GEOGRÁFICA INTERACTIVA & MAPA TELEMÁTICO SANTANDER (LEAFLET)
+    // =========================================================================
+    let geofenceMap = null;
+    let geofenceRouteLine = null;
+    let geofenceDestMarker = null;
+
+    const zoneCoords = {
+        bga: [7.1193, -73.1227],
+        florida: [7.0620, -73.0864],
+        giron: [7.0722, -73.1697],
+        piede: [6.9880, -73.0510],
+        lebrija: [7.1165, -73.2185],
+        barranca: [7.0653, -73.8547],
+        sangil: [6.5544, -73.1340]
+    };
+
+    const zoneMap = {
+        bga: {
+            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+            sub: 'Área Metropolitana de Bucaramanga • Despacho Habilitado',
+            depot: 'Patio Central Girón - Salida Palonegro',
+            time: '< 1.5 Horas',
+            freight: 'Tarifa Plana Metropolitana ($0 recargo)',
+            policy: 'Sura Obra Santander Vigente',
+            addr: 'Carrera 27 con Calle 36, Obra Centro, Bucaramanga'
+        },
+        florida: {
+            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+            sub: 'Área Metropolitana de Bucaramanga • Corredor Cañaveral/Menzuly',
+            depot: 'Patio Floridablanca (Valle de Menzuly)',
+            time: '< 1 Hora',
+            freight: 'Tarifa Plana Metropolitana ($0 recargo)',
+            policy: 'Sura Obra Santander Vigente',
+            addr: 'Autopista Floridablanca Km 4, Condominio Mensulí'
+        },
+        giron: {
+            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+            sub: 'Zona Industrial Chimitá • Salida Inmediata de Patios',
+            depot: 'Patio Central Girón (Anillo Vial Km 2.5)',
+            time: '< 45 Minutos',
+            freight: 'Despacho Directo en Parque ($0 recargo)',
+            policy: 'Sura Obra Santander Vigente',
+            addr: 'Anillo Vial Chimitá - Girón Km 2.5, Parque Industrial'
+        },
+        piede: {
+            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+            sub: 'Área Metropolitana de Bucaramanga • Sector Guatiguará',
+            depot: 'Patio Central Girón - Corredor Sur',
+            time: '< 2.5 Horas',
+            freight: 'Tarifa Plana Metropolitana ($0 recargo)',
+            policy: 'Sura Obra Santander Vigente',
+            addr: 'Vía Guatiguará Km 1.5, Zona de Expansión Piedecuesta'
+        },
+        lebrija: {
+            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+            sub: 'Corredor Palonegro • Cobertura Suburbana',
+            depot: 'Patio Central Girón - Vía Aeropuerto',
+            time: '< 3.5 Horas',
+            freight: 'Flete Suburbano Bonificado ($45.000 COP)',
+            policy: 'Sura Obra Santander Vigente',
+            addr: 'Sector Aeropuerto Palonegro, Entrada Lebrija'
+        },
+        barranca: {
+            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+            sub: 'Magdalena Medio • Equipos Pesados e Industriales',
+            depot: 'Sub-base Satélite Barrancabermeja - Vía Yuma',
+            time: '< 6 Horas',
+            freight: 'Flete Industrial Regional ($180.000 COP)',
+            policy: 'Póliza Ecopetrol/Sura Obra Vigente',
+            addr: 'Vía Yuma Km 12, Sector El Centro, Barrancabermeja'
+        },
+        sangil: {
+            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
+            sub: 'Provincia Guanentá • Despacho Programado en Camabaja',
+            depot: 'Punto de Enlace San Gil - Vía Nacional',
+            time: '< 8 Horas',
+            freight: 'Flete Intermunicipal Programado ($220.000 COP)',
+            policy: 'Sura Obra Santander Vigente',
+            addr: 'Avenida 19 # 12-40, Obra Vía San Gil - Barichara'
+        }
+    };
+
+    function initGeofenceMap() {
+        if (typeof L === 'undefined') return;
+        const container = document.getElementById('geofence-leaflet-map');
+        if (!container || geofenceMap) return;
+
+        geofenceMap = L.map('geofence-leaflet-map', {
+            center: [7.0722, -73.14],
+            zoom: 11,
+            zoomControl: false,
+            attributionControl: false
+        });
+
+        L.control.zoom({ position: 'bottomright' }).addTo(geofenceMap);
+
+        // Capa de Mapa CartoDB Positron / OSM
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            subdomains: 'abcd'
+        }).addTo(geofenceMap);
+
+        // 1. Polígono Cerca Principal AMB (Bucaramanga, Floridablanca, Girón, Piedecuesta)
+        const ambCoords = [
+            [7.175, -73.155],
+            [7.165, -73.110],
+            [7.140, -73.090],
+            [7.085, -73.080],
+            [7.050, -73.070],
+            [6.980, -73.040],
+            [6.960, -73.060],
+            [6.970, -73.095],
+            [7.020, -73.150],
+            [7.060, -73.185],
+            [7.110, -73.195],
+            [7.160, -73.180]
+        ];
+
+        const ambPoly = L.polygon(ambCoords, {
+            color: '#10b981',
+            weight: 2,
+            dashArray: '6, 4',
+            fillColor: '#10b981',
+            fillOpacity: 0.12
+        }).addTo(geofenceMap);
+
+        ambPoly.bindTooltip('<b>Cerca Geográfica Principal AMB</b><br>Flete $0 Bonificado • Despacho &lt; 2.5h', {
+            sticky: true
+        });
+
+        // 2. Polígono Cerca Satélite Santander (Lebrija, Barrancabermeja, San Gil)
+        const santanderCoords = [
+            [7.25, -73.30],
+            [7.22, -73.05],
+            [7.10, -72.95],
+            [6.50, -73.05],
+            [6.50, -73.25],
+            [7.00, -73.90],
+            [7.15, -73.90],
+            [7.25, -73.30]
+        ];
+
+        L.polygon(santanderCoords, {
+            color: '#0284c7',
+            weight: 1.5,
+            dashArray: '4, 6',
+            fillColor: '#0284c7',
+            fillOpacity: 0.03
+        }).addTo(geofenceMap);
+
+        // 3. Marcador Patio Central Girón
+        const hubIcon = L.divIcon({
+            className: 'custom-hub-marker',
+            html: '<span class="hub-pulse-ring"></span><span class="hub-core"></span>',
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+        });
+
+        const hubMarker = L.marker([7.0722, -73.1697], { icon: hubIcon }).addTo(geofenceMap);
+        hubMarker.bindPopup(`
+            <div class="geo-popup-title">
+                Patio Central Girón
+                <span class="geo-popup-badge badge-hub">HUB PRINCIPAL</span>
+            </div>
+            <div class="geo-popup-body">
+                Centro de despacho primario y taller 24/7. 32 equipos pesados y 4 camabajas operativas.
+            </div>
+            <div class="geo-popup-meta">
+                📍 Anillo Vial Chimitá - Girón Km 2.5<br>
+                ⏱️ Despacho express a todo el AMB
+            </div>
+        `);
+
+        // 4. Marcadores de Flota GPS en Obra
+        const fleetData = [
+            { id: 'CAT-420F2', coords: [7.078, -73.152], name: 'Retroexcavadora CAT 420F2', loc: 'Girón (Anillo Vial)', status: 'Operando • 84% Combustible', speed: '0 km/h' },
+            { id: 'Bobcat-S570', coords: [7.062, -73.105], name: 'Minicargador Bobcat S570', loc: 'Floridablanca (Ruitoque)', status: 'En Obra • Telemetría OK', speed: '3.2 km/h' },
+            { id: 'Bosch-GSH27', coords: [7.121, -73.114], name: 'Martillo Demoledor Bosch GSH 27', loc: 'Bucaramanga (Cabecera)', status: 'Alquilado • Frente Activo', speed: 'Fijo' },
+            { id: 'Sakai-SV525', coords: [6.995, -73.055], name: 'Rodillo Compactador Sakai SV525', loc: 'Piedecuesta (Guatiguará)', status: 'En Compactación • 92% Combustible', speed: '4.8 km/h' },
+            { id: 'Cummins-100kVA', coords: [7.065, -73.855], name: 'Generador Diésel Cummins 100kVA', loc: 'Barrancabermeja (Yuma)', status: 'Base Satélite • Suministro Continuo', speed: 'Estacionario' }
+        ];
+
+        fleetData.forEach(item => {
+            const fleetIcon = L.divIcon({
+                className: 'custom-fleet-marker',
+                html: '<span class="fleet-ping"></span><span class="fleet-core"></span>',
+                iconSize: [22, 22],
+                iconAnchor: [11, 11]
+            });
+
+            const m = L.marker(item.coords, { icon: fleetIcon }).addTo(geofenceMap);
+            m.bindPopup(`
+                <div class="geo-popup-title">
+                    ${item.id}
+                    <span class="geo-popup-badge">GPS ONLINE</span>
+                </div>
+                <div class="geo-popup-body">
+                    <strong>${item.name}</strong><br>
+                    Ubicación: ${item.loc}<br>
+                    Estado: ${item.status}
+                </div>
+                <div class="geo-popup-meta">
+                    🛰️ Lat: ${item.coords[0].toFixed(4)}, Lng: ${item.coords[1].toFixed(4)}<br>
+                    Velocidad: ${item.speed}
+                </div>
+            `);
+        });
+
+        // 5. Botones de Control de la Barra de Herramientas
+        const btnAmb = document.getElementById('btn-map-amb');
+        const btnGiron = document.getElementById('btn-map-giron');
+        const btnFleet = document.getElementById('btn-map-fleet');
+        const btnAll = document.getElementById('btn-map-all');
+
+        function setActiveToolBtn(btn) {
+            document.querySelectorAll('.geofence-tool-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        }
+
+        if (btnAmb) {
+            btnAmb.addEventListener('click', () => {
+                setActiveToolBtn(btnAmb);
+                geofenceMap.flyTo([7.0722, -73.14], 12, { duration: 1 });
+            });
+        }
+        if (btnGiron) {
+            btnGiron.addEventListener('click', () => {
+                setActiveToolBtn(btnGiron);
+                geofenceMap.flyTo([7.0722, -73.1697], 15, { duration: 1.2 });
+                hubMarker.openPopup();
+            });
+        }
+        if (btnFleet) {
+            btnFleet.addEventListener('click', () => {
+                setActiveToolBtn(btnFleet);
+                geofenceMap.flyTo([7.07, -73.13], 12, { duration: 1 });
+            });
+        }
+        if (btnAll) {
+            btnAll.addEventListener('click', () => {
+                setActiveToolBtn(btnAll);
+                geofenceMap.flyTo([6.95, -73.35], 9, { duration: 1.2 });
+            });
+        }
+
+        // Trazar destino inicial
+        const select = document.getElementById('geofence-municipality-select');
+        if (select) {
+            updateMapDestination(select.value);
+        }
+    }
+
+    function updateMapDestination(zoneKey) {
+        if (!geofenceMap || typeof L === 'undefined') return;
+        const targetCoords = zoneCoords[zoneKey] || zoneCoords.bga;
+        const depotCoords = [7.0722, -73.1697]; // Patio Girón
+
+        if (geofenceRouteLine) {
+            geofenceMap.removeLayer(geofenceRouteLine);
+            geofenceRouteLine = null;
+        }
+        if (geofenceDestMarker) {
+            geofenceMap.removeLayer(geofenceDestMarker);
+            geofenceDestMarker = null;
+        }
+
+        if (zoneKey !== 'giron') {
+            geofenceRouteLine = L.polyline([depotCoords, targetCoords], {
+                color: '#0284c7',
+                weight: 3,
+                dashArray: '6, 6',
+                opacity: 0.85
+            }).addTo(geofenceMap);
+        }
+
+        const destIcon = L.divIcon({
+            className: 'custom-dest-marker',
+            html: '<span class="dest-pulse-ring"></span><span class="dest-core"></span>',
+            iconSize: [26, 26],
+            iconAnchor: [13, 13]
+        });
+
+        geofenceDestMarker = L.marker(targetCoords, { icon: destIcon }).addTo(geofenceMap);
+
+        if (zoneKey === 'barranca' || zoneKey === 'sangil') {
+            geofenceMap.flyTo(targetCoords, 11, { duration: 1.2 });
+        } else {
+            geofenceMap.flyTo(targetCoords, 13, { duration: 1 });
+        }
+    }
+
     function setupGeofenceValidator() {
         const select = document.getElementById('geofence-municipality-select');
         const addressInput = document.getElementById('geofence-address-input');
         const btnRentNow = document.getElementById('btn-geo-rent-now');
-
-        const zoneMap = {
-            bga: {
-                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-                sub: 'Área Metropolitana de Bucaramanga • Despacho Habilitado',
-                depot: 'Patio Central Girón - Salida Palonegro',
-                time: '< 1.5 Horas',
-                freight: 'Tarifa Plana Metropolitana ($0 recargo)',
-                policy: 'Sura Obra Santander Vigente',
-                addr: 'Carrera 27 con Calle 36, Obra Centro, Bucaramanga'
-            },
-            florida: {
-                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-                sub: 'Área Metropolitana de Bucaramanga • Corredor Cañaveral/Menzuly',
-                depot: 'Patio Floridablanca (Valle de Menzuly)',
-                time: '< 1 Hora',
-                freight: 'Tarifa Plana Metropolitana ($0 recargo)',
-                policy: 'Sura Obra Santander Vigente',
-                addr: 'Autopista Floridablanca Km 4, Condominio Mensulí'
-            },
-            giron: {
-                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-                sub: 'Zona Industrial Chimitá • Salida Inmediata de Patios',
-                depot: 'Patio Central Girón (Anillo Vial Km 2.5)',
-                time: '< 45 Minutos',
-                freight: 'Despacho Directo en Parque ($0 recargo)',
-                policy: 'Sura Obra Santander Vigente',
-                addr: 'Anillo Vial Chimitá - Girón Km 2.5, Parque Industrial'
-            },
-            piede: {
-                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-                sub: 'Área Metropolitana de Bucaramanga • Sector Guatiguará',
-                depot: 'Patio Central Girón - Corredor Sur',
-                time: '< 2.5 Horas',
-                freight: 'Tarifa Plana Metropolitana ($0 recargo)',
-                policy: 'Sura Obra Santander Vigente',
-                addr: 'Vía Guatiguará Km 1.5, Zona de Expansión Piedecuesta'
-            },
-            lebrija: {
-                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-                sub: 'Corredor Palonegro • Cobertura Suburbana',
-                depot: 'Patio Central Girón - Vía Aeropuerto',
-                time: '< 3.5 Horas',
-                freight: 'Flete Suburbano Bonificado ($45.000 COP)',
-                policy: 'Sura Obra Santander Vigente',
-                addr: 'Sector Aeropuerto Palonegro, Entrada Lebrija'
-            },
-            barranca: {
-                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-                sub: 'Magdalena Medio • Equipos Pesados e Industriales',
-                depot: 'Sub-base Satélite Barrancabermeja - Vía Yuma',
-                time: '< 6 Horas',
-                freight: 'Flete Industrial Regional ($180.000 COP)',
-                policy: 'Póliza Ecopetrol/Sura Obra Vigente',
-                addr: 'Vía Yuma Km 12, Sector El Centro, Barrancabermeja'
-            },
-            sangil: {
-                title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-                sub: 'Provincia Guanentá • Despacho Programado en Camabaja',
-                depot: 'Punto de Enlace San Gil - Vía Nacional',
-                time: '< 8 Horas',
-                freight: 'Flete Intermunicipal Programado ($220.000 COP)',
-                policy: 'Sura Obra Santander Vigente',
-                addr: 'Avenida 19 # 12-40, Obra Vía San Gil - Barichara'
-            }
-        };
 
         function updateGeofenceDisplay() {
             if (!select) return;
@@ -1277,6 +1640,18 @@
             if (addressInput && !addressInput.value) {
                 addressInput.value = data.addr;
             }
+
+            // Actualizar tarjeta de zona activa
+            document.querySelectorAll('.zone-pill-card').forEach(card => {
+                const z = card.getAttribute('data-zone');
+                if (z) {
+                    const isActive = (z === select.value) || (z === 'bga' && ['bga', 'florida', 'giron', 'piede'].includes(select.value));
+                    card.classList.toggle('active-zone', isActive);
+                }
+            });
+
+            // Actualizar destino en el mapa Leaflet
+            updateMapDestination(select.value);
         }
 
         if (select) {
@@ -1288,6 +1663,21 @@
                 showToast(`Cerca Geográfica: ${select.options[select.selectedIndex].text} verificada.`, 'success', 2500);
             });
         }
+
+        // Clic en tarjetas de zonas rápidas
+        document.querySelectorAll('.zone-pill-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const zone = card.getAttribute('data-zone');
+                if (zone && select) {
+                    select.value = zone;
+                    if (addressInput && zoneMap[zone]) {
+                        addressInput.value = zoneMap[zone].addr;
+                    }
+                    updateGeofenceDisplay();
+                    showToast(`Zona seleccionada: ${card.querySelector('h4').textContent}`, 'info');
+                }
+            });
+        });
 
         if (btnRentNow) {
             btnRentNow.addEventListener('click', () => {
@@ -1308,6 +1698,7 @@
         renderAnalytics();
         updateRentalsBadge();
         initEventListeners();
+        initGeofenceMap();
 
         // Sincronización asíncrona con el backend si está corriendo
         syncCatalogWithBackend();
