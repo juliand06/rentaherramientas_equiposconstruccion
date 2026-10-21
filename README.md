@@ -171,6 +171,14 @@ El frontend ofrece una experiencia de usuario moderna y estilizada:
    - **Cliente:** Centro de control con *stepper* de 4 fases (`Solicitada` $\to$ `Confirmada/Paga` $\to$ `En Obra` $\to$ `Devuelta`), pasarela de pago simulada y visor de contratos digitales.
    - **Proveedor:** Registro de nueva maquinaria pesada y control de flota.
    - **Administrador:** Tablero de Business Intelligence con KPIs globales, gráfico de barras de ingresos por categoría y gráfico circular (donut) de estado de flota.
+5. **Zonas de Proyecto & Logística de Despacho (Santander):**
+   - Mapa interactivo vectorial SVG animado de frentes de obra en el departamento de Santander y el Área Metropolitana de Bucaramanga (AMB).
+   - Visualización de hubs operativos (Patio Central Girón Chimitá, Bucaramanga, Floridablanca, Piedecuesta, Barrancabermeja y Lebrija).
+   - Monitoreo logístico con camabajas animadas en ruta, barrido holográfico a 60fps y fichas de frentes de obra autónomas sin depender de APIs de terceros ni tokens.
+6. **Facturación Electrónica DIAN y Pasarela Colombiana:**
+   - Factura electrónica oficial con NIT, resolución DIAN, código CUFE de 96 caracteres, código QR y estilos optimizados para impresión/PDF.
+   - Pasarela de pago simulada para contratistas con soporte para Tarjetas, PSE (Débito Bancario) y Nequi/Daviplata.
+   - Ciclo de vida completo: Pago, cancelación de reservas (con liberación de flota) y devolución de maquinaria con liberación de garantía.
 
 ---
 

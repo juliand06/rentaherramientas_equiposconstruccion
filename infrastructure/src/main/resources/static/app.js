@@ -124,7 +124,7 @@
         }
     ];
 
-    // Reservas de ejemplo para seguimiento
+    // Reservas de ejemplo para seguimiento del ciclo de vida en Santander
     const INITIAL_RESERVATIONS = [
         {
             id: 'RES-2026-901',
@@ -136,24 +136,108 @@
             days: 6,
             dailyRate: 240000,
             subtotal: 1440000,
+            tax: 273600,
             deposit: 900000,
-            total: 2340000,
+            total: 2613600,
             siteAddress: 'Autopista Floridablanca Km 4, Condominio Mensulí, Floridablanca, Santander',
-            status: 'DELIVERED', // REQUESTED, CONFIRMED, DELIVERED, RETURNED
+            status: 'DELIVERED', // REQUESTED, CONFIRMED, DELIVERED, RETURNED, CANCELLED
             stepIndex: 3,
-            contractCode: 'RT-SAN-2026-901'
+            contractCode: 'RT-SAN-2026-901',
+            invoiceNumber: 'RTSA-2026-0914',
+            paymentMethod: 'Transferencia PSE Bancolombia',
+            approvalCode: 'AUTH-COL-882194',
+            paid: true,
+            cufeCode: 'a8b9c0d1e2f3456789abcdef0123456789abcdefa8b9c0d1e2f3456789abcdef0123456789abcdef01234567'
+        },
+        {
+            id: 'RES-2026-902',
+            toolId: 'tool-001',
+            toolName: 'Retroexcavadora Orugas CAT 420F2',
+            toolImage: 'assets/images/tools/cat-420f2-excavator.jpg',
+            startDate: '2026-10-22',
+            endDate: '2026-10-25',
+            days: 3,
+            dailyRate: 420000,
+            subtotal: 1260000,
+            tax: 239400,
+            deposit: 1500000,
+            total: 2999400,
+            siteAddress: 'Carrera 27 con Calle 36, Obra Edificio Panorama, Bucaramanga, Santander',
+            status: 'REQUESTED',
+            stepIndex: 1,
+            contractCode: 'RT-SAN-2026-902',
+            invoiceNumber: 'RTSA-2026-0915',
+            paymentMethod: null,
+            approvalCode: null,
+            paid: false,
+            cufeCode: 'f4e3d2c1b0a9876543210fedcba9876543210fedf4e3d2c1b0a9876543210fedcba9876543210fed12345678'
         }
     ];
 
+    // =========================================================================
+    // CUENTAS OFICIALES SEGÚN README.md & PERSISTENCIA LOCAL
+    // =========================================================================
+    const SYSTEM_ACCOUNTS = [
+        {
+            id: 'usr-admin-01',
+            name: 'Carlos Administrador',
+            email: 'admin@rentatools.com',
+            password: 'Admin123456!',
+            role: 'ADMIN'
+        },
+        {
+            id: 'usr-prov-01',
+            name: 'Maquinaria Pesada Santander S.A.S.',
+            email: 'proveedor.equipos@maquinariacolombia.com',
+            password: 'Prov123456!',
+            role: 'PROVIDER'
+        },
+        {
+            id: 'usr-client-01',
+            name: 'Constructora del Oriente S.A.',
+            email: 'cliente.constructora@constructora.com',
+            password: 'Client123456!',
+            role: 'CLIENT'
+        }
+    ];
+
+    function getStoredUsers() {
+        try {
+            const raw = localStorage.getItem('rentatools_registered_users');
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveRegisteredUser(user) {
+        try {
+            const users = getStoredUsers();
+            users.push(user);
+            localStorage.setItem('rentatools_registered_users', JSON.stringify(users));
+        } catch (e) {
+            console.error('Error saving user', e);
+        }
+    }
+
+    function getInitialSession() {
+        try {
+            const saved = localStorage.getItem('rentatools_active_session');
+            if (saved) return JSON.parse(saved);
+        } catch (e) {}
+        // Usuario inicial: Cliente Oficial del README
+        return {
+            id: 'usr-client-01',
+            name: 'Constructora del Oriente S.A.',
+            email: 'cliente.constructora@constructora.com',
+            role: 'CLIENT',
+            token: 'jwt-session-client-init'
+        };
+    }
+
     // Estado Reactivo Central
     const state = {
-        currentUser: {
-            id: 'user-001',
-            name: 'Julian Dev',
-            email: 'cliente@rentatools.com',
-            role: 'CLIENT', // CLIENT, PROVIDER, ADMIN
-            token: 'demo-jwt-token-active'
-        },
+        currentUser: getInitialSession(),
         tools: [...INITIAL_TOOLS],
         reservations: [...INITIAL_RESERVATIONS],
         providerTools: INITIAL_TOOLS.slice(0, 3),
@@ -497,10 +581,15 @@
     // 6. RENDERIZADO DE ALQUILERES & SEGUIMIENTO (CLIENTE)
     // =========================================================================
 
+    // =========================================================================
+    // 6. RENDERIZADO DE ALQUILERES & CICLO DE VIDA (CLIENTE SANTANDER)
+    // =========================================================================
+
     function updateRentalsBadge() {
         const badge = document.getElementById('active-rentals-count');
         if (badge) {
-            badge.textContent = state.reservations.length;
+            const activeCount = state.reservations.filter(r => r.status !== 'CANCELLED' && r.status !== 'RETURNED').length;
+            badge.textContent = activeCount;
         }
     }
 
@@ -513,7 +602,7 @@
                 <div class="empty-state-card">
                     <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" style="margin: 0 auto 10px; display: block;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                     <h3>No tienes alquileres en curso</h3>
-                    <p>Explora el catálogo y solicita tu primera maquinaria pesada hoy mismo.</p>
+                    <p>Explora el catálogo y solicita tu primera maquinaria pesada para tu obra en Santander.</p>
                 </div>
             `;
             return;
@@ -522,8 +611,8 @@
         container.innerHTML = state.reservations.map(res => {
             const steps = [
                 { label: '1. Solicitada', completed: res.stepIndex >= 1, current: res.stepIndex === 1 },
-                { label: '2. Confirmada & Paga', completed: res.stepIndex >= 2, current: res.stepIndex === 2 },
-                { label: '3. En Obra', completed: res.stepIndex >= 3, current: res.stepIndex === 3 },
+                { label: '2. Paga & Confirmada', completed: res.stepIndex >= 2, current: res.stepIndex === 2 },
+                { label: '3. En Obra Activa', completed: res.stepIndex >= 3, current: res.stepIndex === 3 },
                 { label: '4. Finalizada', completed: res.stepIndex >= 4, current: res.stepIndex === 4 }
             ];
 
@@ -534,28 +623,64 @@
                 </div>
             `).join('');
 
-            const progressPct = ((res.stepIndex - 1) / 3) * 100;
+            const progressPct = res.status === 'CANCELLED' ? 0 : Math.min(100, Math.max(0, ((res.stepIndex - 1) / 3) * 100));
 
-            let actionBtnHtml = '';
+            // Insignia de estado contextual
+            let statusBadgeHtml = '';
             if (res.status === 'REQUESTED') {
-                actionBtnHtml = `
-                    <button class="btn-primary" data-action="pay-confirm" data-res-id="${res.id}">
-                        Pagar Depósito &amp; Confirmar
+                statusBadgeHtml = `<span class="badge-rental-status badge-requested">Pendiente de Pago</span>`;
+            } else if (res.status === 'CONFIRMED') {
+                statusBadgeHtml = `<span class="badge-rental-status badge-confirmed">Pago Aprobado • En Alistamiento</span>`;
+            } else if (res.status === 'DELIVERED') {
+                statusBadgeHtml = `<span class="badge-rental-status badge-delivered">En Obra Activa</span>`;
+            } else if (res.status === 'RETURNED') {
+                statusBadgeHtml = `<span class="badge-rental-status badge-returned">Finalizado • Depósito Devuelto</span>`;
+            } else if (res.status === 'CANCELLED') {
+                statusBadgeHtml = `<span class="badge-rental-status badge-cancelled">Alquiler Cancelado</span>`;
+            }
+
+            // Botones de acción del ciclo de vida
+            let lifecycleButtonsHtml = '';
+            if (res.status === 'REQUESTED') {
+                lifecycleButtonsHtml = `
+                    <button class="btn-pay-action btn-sm" data-action="pay-checkout" data-res-id="${res.id}">
+                        💳 Pagar Alquiler (${currencyFormatter.format(res.total)})
+                    </button>
+                    <button class="btn-cancel-action btn-sm" data-action="cancel-rental" data-res-id="${res.id}">
+                        ✕ Cancelar Solicitud
                     </button>
                 `;
             } else if (res.status === 'CONFIRMED') {
-                actionBtnHtml = `
-                    <button class="btn-secondary" data-action="dispatch-site" data-res-id="${res.id}">
-                        Registrar Llegada a Obra
+                lifecycleButtonsHtml = `
+                    <button class="btn-primary btn-sm" data-action="dispatch-site" data-res-id="${res.id}">
+                        🚛 Confirmar Llegada a Obra
+                    </button>
+                    <button class="btn-cancel-action btn-sm" data-action="cancel-rental" data-res-id="${res.id}">
+                        ✕ Cancelar Pedido
                     </button>
                 `;
             } else if (res.status === 'DELIVERED') {
-                actionBtnHtml = `
-                    <button class="btn-secondary" data-action="return-tool" data-res-id="${res.id}">
-                        Notificar Devolución
+                lifecycleButtonsHtml = `
+                    <button class="btn-finish-action btn-sm" data-action="return-tool" data-res-id="${res.id}">
+                        📦 Finalizar / Devolver Maquinaria
                     </button>
                 `;
+            } else if (res.status === 'RETURNED') {
+                lifecycleButtonsHtml = `
+                    <span class="badge-returned">✓ Maquinaria devuelta a Patio Girón</span>
+                `;
+            } else if (res.status === 'CANCELLED') {
+                lifecycleButtonsHtml = `
+                    <span class="badge-cancelled">✕ Reserva anulada</span>
+                `;
             }
+
+            // Botón de Factura Electrónica (Siempre disponible para auditoría)
+            const invoiceBtnHtml = `
+                <button class="btn-invoice-action btn-sm" data-action="view-invoice" data-res-id="${res.id}">
+                    🧾 Ver Factura Electrónica DIAN
+                </button>
+            `;
 
             return `
                 <div class="rental-order-card" data-res-id="${res.id}">
@@ -563,10 +688,10 @@
                         <div class="rental-code-block">
                             <span class="pulse-indicator"></span>
                             <span class="rental-code">RESERVA #${res.id}</span>
-                            <span class="status-available" style="padding: 2px 8px; border-radius: 999px; font-size: 0.72rem;">${res.status}</span>
+                            ${statusBadgeHtml}
                         </div>
                         <div class="rental-dates-tag">
-                            <span>Periodo: <strong>${res.startDate}</strong> al <strong>${res.endDate}</strong> (${res.days} días)</span>
+                            <span>Periodo en Santander: <strong>${res.startDate}</strong> al <strong>${res.endDate}</strong> (${res.days} días)</span>
                         </div>
                     </div>
 
@@ -574,27 +699,33 @@
                         <div class="rental-item-icon"><img src="${res.toolImage}" alt="${res.toolName}" class="rental-item-photo"></div>
                         <div>
                             <h3 class="rental-item-name">${res.toolName}</h3>
-                            <div class="rental-item-dates">Entrega en obra: ${res.siteAddress}</div>
+                            <div class="rental-item-dates">Destino Obra: <strong>${res.siteAddress}</strong></div>
+                            ${res.paymentMethod ? `<div class="rental-item-dates" style="color: #059669; font-weight: 500;">✓ Pago: ${res.paymentMethod} (Aprobación: ${res.approvalCode || 'AUTH-OK'})</div>` : ''}
                         </div>
                     </div>
 
-                    <!-- Stepper de 4 Fases -->
-                    <div class="stepper-container">
-                        <div class="stepper-line">
-                            <div class="stepper-line-progress" style="width: ${progressPct}%;"></div>
+                    <!-- Stepper de 4 Fases (Solo si no está cancelado) -->
+                    ${res.status !== 'CANCELLED' ? `
+                        <div class="stepper-container">
+                            <div class="stepper-line">
+                                <div class="stepper-line-progress" style="width: ${progressPct}%;"></div>
+                            </div>
+                            ${stepsHtml}
                         </div>
-                        ${stepsHtml}
-                    </div>
+                    ` : `
+                        <div style="background: #fef2f2; border: 1px solid #fee2e2; border-radius: 6px; padding: 8px 12px; margin: 12px 0; font-size: 0.78rem; color: #b91c1c;">
+                            Este alquiler fue cancelado. El equipo fue reincorporado a la flota disponible en Santander.
+                        </div>
+                    `}
 
                     <div class="rental-order-actions">
                         <div class="rental-total-amount">
-                            Total Liquidado: ${currencyFormatter.format(res.total)} COP
+                            Liquidación Total: <strong>${currencyFormatter.format(res.total)} COP</strong>
+                            <span style="font-size: 0.70rem; color: #64748b; font-weight: normal; display: block;">Incluye subtotal + IVA 19% + Depósito reembolsable</span>
                         </div>
                         <div class="rental-buttons-group">
-                            <button class="btn-secondary" data-action="view-contract" data-res-id="${res.id}">
-                                Ver Contrato &amp; Acta
-                            </button>
-                            ${actionBtnHtml}
+                            ${invoiceBtnHtml}
+                            ${lifecycleButtonsHtml}
                         </div>
                     </div>
                 </div>
@@ -602,77 +733,355 @@
         }).join('');
     }
 
-    // Acciones sobre las reservas
+    // =========================================================================
+    // CONTROLADOR DE ACCIONES DEL ALQUILER (CLIENTE)
+    // =========================================================================
+
+    let currentPayingReservationId = null;
+
     async function handleRentalAction(action, resId) {
         const res = state.reservations.find(r => r.id === resId);
         if (!res) return;
 
-        if (action === 'pay-confirm') {
-            // Llamar API de pagos y confirmación
-            await apiRequest('/api/payments', {
-                method: 'POST',
-                body: JSON.stringify({
-                    reservationId: res.id,
-                    amount: res.total,
-                    currency: 'COP',
-                    paymentMethod: 'CREDIT_CARD'
-                })
-            });
-            await apiRequest(`/api/reservations/${res.id}/confirm`, { method: 'PUT' });
-
-            res.status = 'CONFIRMED';
-            res.stepIndex = 2;
-            renderClientRentals();
-            showToast(`Pago procesado. ¡Reserva #${res.id} confirmada!`, 'success');
+        if (action === 'pay-checkout') {
+            openPaymentGateway(resId);
+        } else if (action === 'cancel-rental') {
+            handleRentalCancel(resId);
+        } else if (action === 'return-tool') {
+            handleRentalReturn(resId);
         } else if (action === 'dispatch-site') {
             res.status = 'DELIVERED';
             res.stepIndex = 3;
             renderClientRentals();
-            showToast(`Equipo en obra. Acta de entrega firmada electrónicamente.`, 'success');
-        } else if (action === 'return-tool') {
-            res.status = 'RETURNED';
-            res.stepIndex = 4;
-            const tool = state.tools.find(t => t.id === res.toolId);
-            if (tool) tool.status = 'AVAILABLE';
-            renderCatalog();
-            renderClientRentals();
-            showToast(`Devolución completada. Depósito en garantía liberado.`, 'success');
-        } else if (action === 'view-contract') {
-            openContractModal(res);
+            showToast('¡Llegada a obra confirmada! Maquinaria pesada entregada e inventariada en frente de obra.', 'success');
+        } else if (action === 'view-invoice') {
+            openInvoiceView(resId);
         }
     }
 
-    // Modal de Contrato y Acta PDF
-    function openContractModal(res) {
-        const modal = document.getElementById('modal-contract-view');
-        const code = document.getElementById('contract-code');
-        const content = document.getElementById('contract-body-content');
+    // Cancelar Alquiler (Cliente)
+    function handleRentalCancel(resId) {
+        const res = state.reservations.find(r => r.id === resId);
+        if (!res) return;
+
+        const confirmCancel = confirm(`¿Estás seguro de que deseas cancelar la reserva #${res.id} (${res.toolName})? El equipo volverá a estar disponible en el catálogo de Santander.`);
+        if (!confirmCancel) return;
+
+        res.status = 'CANCELLED';
+        res.stepIndex = 0;
+
+        // Liberar la maquinaria en el catálogo
+        const tool = state.tools.find(t => t.id === res.toolId);
+        if (tool) {
+            tool.status = 'AVAILABLE';
+        }
+
+        renderCatalog();
+        renderClientRentals();
+        updateRentalsBadge();
+
+        showToast(`La reserva #${res.id} ha sido cancelada exitosamente.`, 'warning');
+    }
+
+    // Finalizar / Devolver Pedido (Cliente)
+    function handleRentalReturn(resId) {
+        const res = state.reservations.find(r => r.id === resId);
+        if (!res) return;
+
+        const confirmReturn = confirm(`¿Confirmas la devolución y retiro del equipo "${res.toolName}" a Patio Central Girón? Se liquidará el fin del contrato y se liberará tu depósito de garantía.`);
+        if (!confirmReturn) return;
+
+        res.status = 'RETURNED';
+        res.stepIndex = 4;
+
+        // Liberar equipo en catálogo
+        const tool = state.tools.find(t => t.id === res.toolId);
+        if (tool) {
+            tool.status = 'AVAILABLE';
+        }
+
+        renderCatalog();
+        renderClientRentals();
+        updateRentalsBadge();
+
+        showToast(`¡Alquiler finalizado! Maquinaria recibida en Patio Girón y depósito en garantía liberado.`, 'success');
+    }
+
+    // =========================================================================
+    // PASARELA DE PAGOS COLOMBIANA (PSE, TARJETAS, NEQUI)
+    // =========================================================================
+
+    function openPaymentGateway(resId) {
+        const res = state.reservations.find(r => r.id === resId);
+        if (!res) return;
+
+        currentPayingReservationId = resId;
+        const modal = document.getElementById('modal-payment-checkout');
         if (!modal) return;
 
-        code.textContent = `REF: ${res.contractCode || 'RT-CTR-2026'}`;
-        content.innerHTML = `
-            <p><strong>ARRENDADOR:</strong> RentaTools PRO Colombia S.A.S. (NIT 901.849.201-4)</p>
-            <p><strong>ARRENDATARIO:</strong> ${state.currentUser.name} (${state.currentUser.email})</p>
-            <p><strong>EQUIPO IDENTIFICADO:</strong> ${res.toolName}</p>
-            <p><strong>DIRECCIÓN DE OBRA:</strong> ${res.siteAddress}</p>
-            <p><strong>VIGENCIA:</strong> Del ${res.startDate} al ${res.endDate} (${res.days} días calendario).</p>
-            <hr style="margin: 12px 0; border: 0; border-top: 1px solid #cbd5e1;">
-            <p><strong>LIQUIDACIÓN COMERCIAL:</strong></p>
-            <ul>
-                <li>Tarifa Diaria: ${currencyFormatter.format(res.dailyRate)} COP</li>
-                <li>Subtotal Renta: ${currencyFormatter.format(res.subtotal)} COP</li>
-                <li>Depósito de Seguridad: ${currencyFormatter.format(res.deposit)} COP</li>
-                <li><strong>TOTAL COMPROMETIDO: ${currencyFormatter.format(res.total)} COP</strong></li>
-            </ul>
-            <hr style="margin: 12px 0; border: 0; border-top: 1px solid #cbd5e1;">
-            <p><strong>CLÁUSULAS ESPECIALES:</strong> El arrendatario asume la custodia del equipo y se compromete a operarlo conforme al manual de fabricante. Póliza Todo Riesgo activa por valor asegurado de $150.000.000 COP.</p>
-            <div style="margin-top: 16px; display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b;">
-                <div>Firma Digital Arrendador: <strong>HASH_VERIFIED_7a89e</strong></div>
-                <div>Firma Digital Cliente: <strong>HASH_VERIFIED_4fe35</strong></div>
-            </div>
-        `;
+        const subtotal = res.subtotal;
+        const tax = res.tax || Math.round(subtotal * 0.19);
+        const deposit = res.deposit;
+        const total = subtotal + tax + deposit;
+
+        // Actualizar datos del modal
+        const codeEl = document.getElementById('pay-res-code');
+        const toolEl = document.getElementById('pay-tool-name');
+        const periodEl = document.getElementById('pay-rental-period');
+        const subtotalEl = document.getElementById('pay-calc-subtotal');
+        const taxEl = document.getElementById('pay-calc-tax');
+        const depositEl = document.getElementById('pay-calc-deposit');
+        const totalEl = document.getElementById('pay-calc-total');
+
+        if (codeEl) codeEl.textContent = `#${res.id}`;
+        if (toolEl) toolEl.textContent = res.toolName;
+        if (periodEl) periodEl.textContent = `${res.days} días (${res.startDate} al ${res.endDate})`;
+        if (subtotalEl) subtotalEl.textContent = `${currencyFormatter.format(subtotal)} COP`;
+        if (taxEl) taxEl.textContent = `${currencyFormatter.format(tax)} COP`;
+        if (depositEl) depositEl.textContent = `${currencyFormatter.format(deposit)} COP`;
+        if (totalEl) totalEl.textContent = `${currencyFormatter.format(total)} COP`;
+
+        document.querySelectorAll('.pay-btn-amount').forEach(el => {
+            el.textContent = `${currencyFormatter.format(total)} COP`;
+        });
 
         modal.classList.remove('hidden');
+    }
+
+    function setupPaymentGatewayListeners() {
+        const modal = document.getElementById('modal-payment-checkout');
+        const btnClose = document.getElementById('modal-payment-close');
+        const processingOverlay = document.getElementById('payment-processing-overlay');
+        const processingText = document.getElementById('pay-processing-text');
+
+        if (btnClose && modal) {
+            btnClose.addEventListener('click', () => modal.classList.add('hidden'));
+        }
+
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.add('hidden');
+            });
+        }
+
+        // Cambio de pestañas de métodos de pago
+        document.querySelectorAll('.pay-tab-btn').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.pay-tab-btn').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const method = tab.getAttribute('data-method');
+                const formCard = document.getElementById('form-pay-card');
+                const formPse = document.getElementById('form-pay-pse');
+                const formNequi = document.getElementById('form-pay-nequi');
+
+                if (formCard) formCard.classList.toggle('hidden', method !== 'card');
+                if (formPse) formPse.classList.toggle('hidden', method !== 'pse');
+                if (formNequi) formNequi.classList.toggle('hidden', method !== 'nequi');
+            });
+        });
+
+        // Envíos de Formularios de Pago
+        function executeSimulatedPayment(paymentMethodLabel) {
+            if (!currentPayingReservationId) return;
+            const res = state.reservations.find(r => r.id === currentPayingReservationId);
+            if (!res) return;
+
+            if (processingOverlay) {
+                if (processingText) processingText.textContent = `Procesando pago con ${paymentMethodLabel}...`;
+                processingOverlay.classList.remove('hidden');
+            }
+
+            setTimeout(() => {
+                if (processingOverlay) processingOverlay.classList.add('hidden');
+                if (modal) modal.classList.add('hidden');
+
+                res.status = 'CONFIRMED';
+                res.stepIndex = 2;
+                res.paid = true;
+                res.paymentMethod = paymentMethodLabel;
+                res.approvalCode = `AUTH-${Math.floor(100000 + Math.random() * 900000)}`;
+
+                renderClientRentals();
+                updateRentalsBadge();
+
+                showToast(`¡Pago Aprobado con ${paymentMethodLabel}! Factura electrónica generada. Tu maquinaria está en alistamiento.`, 'success', 5000);
+            }, 1400);
+        }
+
+        const formCard = document.getElementById('form-pay-card');
+        if (formCard) {
+            formCard.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const cardNum = document.getElementById('pay-card-number').value.replace(/\s+/g, '');
+                const last4 = cardNum.slice(-4) || '9010';
+                executeSimulatedPayment(`Tarjeta Crédito/Débito (terminada en •••• ${last4})`);
+            });
+        }
+
+        const formPse = document.getElementById('form-pay-pse');
+        if (formPse) {
+            formPse.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const bankSelect = document.getElementById('pse-bank');
+                const bankName = bankSelect ? bankSelect.options[bankSelect.selectedIndex].text : 'Bancolombia';
+                executeSimulatedPayment(`PSE Débito Bancario (${bankName})`);
+            });
+        }
+
+        const formNequi = document.getElementById('form-pay-nequi');
+        if (formNequi) {
+            formNequi.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const phone = document.getElementById('nequi-phone').value || '318 450 9900';
+                executeSimulatedPayment(`Nequi / Daviplata (+57 ${phone})`);
+            });
+        }
+    }
+
+    // =========================================================================
+    // VISOR DE FACTURA ELECTRÓNICA DE VENTA OFICIAL DIAN
+    // =========================================================================
+
+    function openInvoiceView(resId) {
+        const res = state.reservations.find(r => r.id === resId);
+        if (!res) return;
+
+        const modal = document.getElementById('modal-invoice-view');
+        if (!modal) return;
+
+        const subtotal = res.subtotal;
+        const tax = res.tax || Math.round(subtotal * 0.19);
+        const deposit = res.deposit;
+        const total = subtotal + tax + deposit;
+        const invoiceNum = res.invoiceNumber || `RTSA-2026-${res.id.replace(/\D/g, '') || '0914'}`;
+
+        // Rellenar cabecera DIAN
+        const numEl = document.getElementById('inv-doc-number');
+        if (numEl) numEl.textContent = invoiceNum;
+
+        const now = new Date();
+        const dateStr = now.toISOString().replace('T', ' ').slice(0, 19);
+        const due = new Date();
+        due.setDate(due.getDate() + 7);
+        const dueStr = due.toISOString().split('T')[0];
+
+        const issueEl = document.getElementById('inv-issue-date');
+        const dueEl = document.getElementById('inv-due-date');
+        const methodEl = document.getElementById('inv-payment-method');
+
+        if (issueEl) issueEl.textContent = dateStr;
+        if (dueEl) dueEl.textContent = dueStr;
+        if (methodEl) methodEl.textContent = res.paymentMethod || 'Transferencia Electrónica PSE / Tarjeta';
+
+        // Datos del cliente
+        const clientNameEl = document.getElementById('inv-client-name');
+        const clientNitEl = document.getElementById('inv-client-nit');
+        const clientAddrEl = document.getElementById('inv-client-address');
+        const clientEmailEl = document.getElementById('inv-client-email');
+        const clientStatusEl = document.getElementById('inv-rental-status');
+        const sigClientEl = document.getElementById('inv-sig-client');
+
+        const activeUser = state.currentUser || { name: 'Constructora del Oriente S.A.S.', email: 'cliente.constructora@constructora.com' };
+
+        if (clientNameEl) clientNameEl.textContent = activeUser.name;
+        if (clientNitEl) clientNitEl.textContent = 'NIT 900.542.119-1 (Santander)';
+        if (clientAddrEl) clientAddrEl.textContent = res.siteAddress;
+        if (clientEmailEl) clientEmailEl.textContent = activeUser.email;
+        if (sigClientEl) sigClientEl.textContent = activeUser.name.toUpperCase();
+
+        if (clientStatusEl) {
+            if (res.status === 'CONFIRMED' || res.status === 'DELIVERED' || res.status === 'RETURNED') {
+                clientStatusEl.textContent = 'VIGENTE • EN REGLA';
+                clientStatusEl.className = 'badge-invoice-status';
+            } else if (res.status === 'CANCELLED') {
+                clientStatusEl.textContent = 'ANULADA / CANCELADA';
+                clientStatusEl.className = 'badge-invoice-status';
+                clientStatusEl.style.background = '#fee2e2';
+                clientStatusEl.style.color = '#b91c1c';
+            } else {
+                clientStatusEl.textContent = 'PROFORMA • PENDIENTE DE PAGO';
+                clientStatusEl.className = 'badge-invoice-status';
+                clientStatusEl.style.background = '#fef3c7';
+                clientStatusEl.style.color = '#b45309';
+            }
+        }
+
+        // Tabla de ítems
+        const tableBody = document.getElementById('inv-items-table-body');
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td class="text-center">1</td>
+                    <td>
+                        <strong>${res.toolName}</strong><br>
+                        <span style="font-size: 0.72rem; color: #64748b;">Arrendamiento de maquinaria pesada para obra en Santander • Serie: ${res.contractCode || 'CAT-2026-X'}</span>
+                    </td>
+                    <td class="text-center">${res.days}</td>
+                    <td class="text-right">${currencyFormatter.format(res.dailyRate)} COP</td>
+                    <td class="text-right"><strong>${currencyFormatter.format(subtotal)} COP</strong></td>
+                </tr>
+            `;
+        }
+
+        // Totales
+        const depAmountEl = document.getElementById('inv-deposit-amount');
+        const subtotalEl = document.getElementById('inv-subtotal-val');
+        const taxEl = document.getElementById('inv-tax-val');
+        const depositEl = document.getElementById('inv-deposit-val');
+        const totalEl = document.getElementById('inv-total-val');
+        const paidBadge = document.getElementById('inv-paid-badge');
+        const cufeEl = document.getElementById('inv-cufe-code');
+
+        if (depAmountEl) depAmountEl.textContent = currencyFormatter.format(deposit).replace('COP', '').trim();
+        if (subtotalEl) subtotalEl.textContent = `${currencyFormatter.format(subtotal)} COP`;
+        if (taxEl) taxEl.textContent = `${currencyFormatter.format(tax)} COP`;
+        if (depositEl) depositEl.textContent = `${currencyFormatter.format(deposit)} COP`;
+        if (totalEl) totalEl.textContent = `${currencyFormatter.format(total)} COP`;
+
+        if (paidBadge) {
+            if (res.paid || res.status === 'CONFIRMED' || res.status === 'DELIVERED' || res.status === 'RETURNED') {
+                paidBadge.textContent = '✓ FACTURA PAGADA / CONFIRMADA';
+                paidBadge.style.background = '#dcfce7';
+                paidBadge.style.color = '#15803d';
+            } else if (res.status === 'CANCELLED') {
+                paidBadge.textContent = '✕ FACTURA ANULADA';
+                paidBadge.style.background = '#fee2e2';
+                paidBadge.style.color = '#b91c1c';
+            } else {
+                paidBadge.textContent = 'PENDIENTE DE PAGO';
+                paidBadge.style.background = '#fef3c7';
+                paidBadge.style.color = '#b45309';
+            }
+        }
+
+        if (cufeEl) {
+            cufeEl.textContent = res.cufeCode || 'a8b9c0d1e2f3456789abcdef0123456789abcdefa8b9c0d1e2f3456789abcdef0123456789abcdef01234567';
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function setupInvoiceModalListeners() {
+        const modal = document.getElementById('modal-invoice-view');
+        const btnClose = document.getElementById('modal-invoice-close');
+        const btnPrint = document.getElementById('btn-print-invoice');
+
+        if (btnClose && modal) {
+            btnClose.addEventListener('click', () => modal.classList.add('hidden'));
+        }
+
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.add('hidden');
+            });
+        }
+
+        if (btnPrint) {
+            btnPrint.addEventListener('click', () => {
+                window.print();
+            });
+        }
     }
 
     // =========================================================================
@@ -995,29 +1404,6 @@
     // 9. GESTIÓN DE ROLES & AUTENTICACIÓN
     // =========================================================================
 
-    function switchRole(newRole) {
-        state.currentUser.role = newRole;
-        if (newRole === 'CLIENT') {
-            state.currentUser.name = 'Julian Contratista';
-            state.currentUser.email = 'cliente@rentatools.com';
-        } else if (newRole === 'PROVIDER') {
-            state.currentUser.name = 'Maquinaria Pesada del Norte S.A.S.';
-            state.currentUser.email = 'proveedor@rentatools.com';
-        } else if (newRole === 'ADMIN') {
-            state.currentUser.name = 'Ing. Administrador de Operaciones';
-            state.currentUser.email = 'admin@rentatools.com';
-        }
-
-        updateUserUI();
-
-        // Actualizar chips de rol
-        document.querySelectorAll('.role-chip').forEach(c => {
-            c.classList.toggle('active', c.getAttribute('data-role') === newRole);
-        });
-
-        showToast(`Rol cambiado a: ${newRole}`, 'info');
-    }
-
     function updateUserUI() {
         const guestBox = document.getElementById('auth-guest-box');
         const userBox = document.getElementById('auth-user-box');
@@ -1025,26 +1411,99 @@
         const displayName = document.getElementById('user-display-name');
         const roleBadge = document.getElementById('user-role-badge');
 
+        const tabProvider = document.getElementById('tab-provider');
+        const tabAnalytics = document.getElementById('tab-analytics');
+
         if (state.currentUser && state.currentUser.token) {
             if (guestBox) guestBox.classList.add('hidden');
             if (userBox) userBox.classList.remove('hidden');
 
             const initials = state.currentUser.name
                 .split(' ')
+                .filter(Boolean)
                 .map(n => n[0])
                 .slice(0, 2)
                 .join('');
             if (avatar) avatar.textContent = initials.toUpperCase() || 'RT';
             if (displayName) displayName.textContent = state.currentUser.name;
-            if (roleBadge) roleBadge.textContent = state.currentUser.role;
+            if (roleBadge) {
+                roleBadge.textContent = state.currentUser.role;
+                roleBadge.className = 'user-role-pill';
+                if (state.currentUser.role === 'CLIENT') roleBadge.classList.add('role-client');
+                else if (state.currentUser.role === 'PROVIDER') roleBadge.classList.add('role-provider');
+                else if (state.currentUser.role === 'ADMIN') roleBadge.classList.add('role-admin');
+            }
+
+            // Control de visibilidad de portales según el rol autenticado
+            const showProvider = (state.currentUser.role === 'PROVIDER' || state.currentUser.role === 'ADMIN');
+            const showAdmin = (state.currentUser.role === 'ADMIN');
+            const showProGroup = showProvider || showAdmin;
+
+            if (tabProvider) tabProvider.style.display = showProvider ? '' : 'none';
+            if (tabAnalytics) tabAnalytics.style.display = showAdmin ? '' : 'none';
+
+            const navDivider = document.getElementById('nav-divider-pro');
+            const navClusterPro = document.getElementById('nav-cluster-pro');
+            const mobileTitleBiz = document.getElementById('mobile-title-biz');
+            const mobileClusterBiz = document.getElementById('mobile-cluster-biz');
+
+            if (navDivider) navDivider.style.display = showProGroup ? '' : 'none';
+            if (navClusterPro) navClusterPro.style.display = showProGroup ? '' : 'none';
+            if (mobileTitleBiz) mobileTitleBiz.style.display = showProGroup ? '' : 'none';
+            if (mobileClusterBiz) mobileClusterBiz.style.display = showProGroup ? '' : 'none';
+
+            // Redirección segura si el rol no tiene acceso a la sección actualmente activa
+            const activeSection = document.querySelector('.content-section.active');
+            if (activeSection && activeSection.id === 'section-analytics' && !showAdmin) {
+                switchTab('section-catalog');
+            } else if (activeSection && activeSection.id === 'section-provider' && !showProvider) {
+                switchTab('section-catalog');
+            }
         } else {
             if (guestBox) guestBox.classList.remove('hidden');
             if (userBox) userBox.classList.add('hidden');
+            if (tabProvider) tabProvider.style.display = 'none';
+            if (tabAnalytics) tabAnalytics.style.display = 'none';
+
+            const navDivider = document.getElementById('nav-divider-pro');
+            const navClusterPro = document.getElementById('nav-cluster-pro');
+            const mobileTitleBiz = document.getElementById('mobile-title-biz');
+            const mobileClusterBiz = document.getElementById('mobile-cluster-biz');
+            if (navDivider) navDivider.style.display = 'none';
+            if (navClusterPro) navClusterPro.style.display = 'none';
+            if (mobileTitleBiz) mobileTitleBiz.style.display = 'none';
+            if (mobileClusterBiz) mobileClusterBiz.style.display = 'none';
         }
     }
 
-    // Cambio de Pestañas de Navegación
+    // Cambio de Pestañas de Navegación con Control de Acceso por Rol
     function switchTab(targetSectionId) {
+        const userRole = (state.currentUser && state.currentUser.token) ? state.currentUser.role : 'GUEST';
+
+        // Validación de permisos estrictos por módulo
+        if (targetSectionId === 'section-analytics') {
+            if (userRole !== 'ADMIN') {
+                showToast('Acceso restringido: El módulo Métricas & BI es exclusivo para Administradores.', 'warning');
+                return;
+            }
+        }
+
+        if (targetSectionId === 'section-provider') {
+            if (userRole !== 'PROVIDER' && userRole !== 'ADMIN') {
+                showToast('Acceso restringido: El Panel de Proveedor es exclusivo para Proveedores o Administrador.', 'warning');
+                return;
+            }
+        }
+
+        if (targetSectionId === 'section-client-rentals') {
+            if (userRole === 'GUEST') {
+                showToast('Inicia sesión para consultar tus contratos y alquileres en curso.', 'info');
+                const btnLogin = document.getElementById('btn-open-login');
+                if (btnLogin) btnLogin.click();
+                return;
+            }
+        }
+
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.classList.toggle('active', tab.getAttribute('data-target') === targetSectionId);
         });
@@ -1052,17 +1511,22 @@
             sec.classList.toggle('active', sec.id === targetSectionId);
         });
 
+        // Cerrar panel móvil si está abierto
+        const mobilePanel = document.getElementById('mobile-nav-panel');
+        const toggleBtn = document.getElementById('btn-mobile-toggle');
+        if (mobilePanel && mobilePanel.classList.contains('open')) {
+            mobilePanel.classList.remove('open');
+            if (toggleBtn) {
+                toggleBtn.classList.remove('active');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+            }
+        }
+
         // Trigger updates depending on section
         if (targetSectionId === 'section-analytics') {
             renderAnalytics();
         } else if (targetSectionId === 'section-coverage') {
-            setTimeout(() => {
-                if (geofenceMap) {
-                    geofenceMap.invalidateSize();
-                } else {
-                    initGeofenceMap();
-                }
-            }, 150);
+            setupProjectRadarMap();
         } else if (targetSectionId === 'section-provider') {
             renderProviderPanel();
         } else if (targetSectionId === 'section-client-rentals') {
@@ -1089,18 +1553,6 @@
             logo.addEventListener('click', () => switchTab('section-catalog'));
         }
 
-        // Roles Rápidos (Demo)
-        document.querySelectorAll('.role-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                const role = chip.getAttribute('data-role');
-                if (role) {
-                    switchRole(role);
-                    if (role === 'CLIENT') switchTab('section-catalog');
-                    if (role === 'PROVIDER') switchTab('section-provider');
-                    if (role === 'ADMIN') switchTab('section-analytics');
-                }
-            });
-        });
 
         // Buscador y Filtros del Catálogo
         const searchInput = document.getElementById('catalog-search');
@@ -1188,19 +1640,11 @@
             formCreateTool.addEventListener('submit', handleCreateToolSubmit);
         }
 
-        // Modal de Contrato
-        const modalContract = document.getElementById('modal-contract-view');
-        const modalContractClose = document.getElementById('modal-contract-close');
-        const btnCloseContractView = document.getElementById('btn-close-contract-view');
-        const btnPrintContract = document.getElementById('btn-print-contract');
+        // Modal de Factura Electrónica DIAN e Impresión
+        setupInvoiceModalListeners();
 
-        if (modalContractClose) modalContractClose.addEventListener('click', () => modalContract.classList.add('hidden'));
-        if (btnCloseContractView) btnCloseContractView.addEventListener('click', () => modalContract.classList.add('hidden'));
-        if (btnPrintContract) {
-            btnPrintContract.addEventListener('click', () => {
-                window.print();
-            });
-        }
+        // Modal de Pasarela de Pagos (PSE, Tarjetas, Nequi)
+        setupPaymentGatewayListeners();
 
         // Botón Descargar Informe PDF (Admin)
         const btnDownloadPdf = document.getElementById('btn-download-pdf-report');
@@ -1213,7 +1657,20 @@
             });
         }
 
-        // Auth Modal & Fast Fills
+        // Módulo de Autenticación & Registro con Validaciones
+        setupAuthLogic();
+
+        // Menú Móvil Responsive y Sincronización
+        initMobileNav();
+
+        // Mapa Animado de Zonas de Proyecto & Logística Santander
+        setupProjectRadarMap();
+    }
+
+    // =========================================================================
+    // LÓGICA DE AUTENTICACIÓN, LOGIN & REGISTRO ROBUSTO
+    // =========================================================================
+    function setupAuthLogic() {
         const modalAuth = document.getElementById('modal-auth');
         const btnOpenLogin = document.getElementById('btn-open-login');
         const btnOpenRegister = document.getElementById('btn-open-register');
@@ -1224,472 +1681,709 @@
         const formRegister = document.getElementById('form-register');
         const btnLogout = document.getElementById('btn-logout');
 
-        if (btnOpenLogin) btnOpenLogin.addEventListener('click', () => {
-            modalAuth.classList.remove('hidden');
-            tabLoginBtn.click();
-        });
-        if (btnOpenRegister) btnOpenRegister.addEventListener('click', () => {
-            modalAuth.classList.remove('hidden');
-            tabRegisterBtn.click();
-        });
-        if (modalAuthClose) modalAuthClose.addEventListener('click', () => modalAuth.classList.add('hidden'));
+        const loginAlert = document.getElementById('login-alert');
+        const registerAlert = document.getElementById('register-alert');
 
-        if (tabLoginBtn) tabLoginBtn.addEventListener('click', () => {
+        if (btnOpenLogin) {
+            btnOpenLogin.addEventListener('click', () => {
+                modalAuth.classList.remove('hidden');
+                tabLoginBtn.click();
+            });
+        }
+
+        if (btnOpenRegister) {
+            btnOpenRegister.addEventListener('click', () => {
+                modalAuth.classList.remove('hidden');
+                tabRegisterBtn.click();
+            });
+        }
+
+        if (modalAuthClose) {
+            modalAuthClose.addEventListener('click', () => {
+                modalAuth.classList.add('hidden');
+            });
+        }
+
+        modalAuth.addEventListener('click', (e) => {
+            if (e.target === modalAuth) {
+                modalAuth.classList.add('hidden');
+            }
+        });
+
+        // Alternar pestañas de Login y Registro
+        tabLoginBtn.addEventListener('click', () => {
             tabLoginBtn.classList.add('active');
+            tabLoginBtn.setAttribute('aria-selected', 'true');
             tabRegisterBtn.classList.remove('active');
+            tabRegisterBtn.setAttribute('aria-selected', 'false');
             formLogin.classList.remove('hidden');
             formRegister.classList.add('hidden');
+            if (loginAlert) loginAlert.classList.add('hidden');
         });
 
-        if (tabRegisterBtn) tabRegisterBtn.addEventListener('click', () => {
+        tabRegisterBtn.addEventListener('click', () => {
             tabRegisterBtn.classList.add('active');
+            tabRegisterBtn.setAttribute('aria-selected', 'true');
             tabLoginBtn.classList.remove('active');
+            tabLoginBtn.setAttribute('aria-selected', 'false');
             formRegister.classList.remove('hidden');
             formLogin.classList.add('hidden');
+            if (registerAlert) registerAlert.classList.add('hidden');
         });
 
-        // Fast Fill Demo Buttons
+        // Cargar cuentas oficiales del README.md
         document.querySelectorAll('.btn-quick-fill').forEach(btn => {
             btn.addEventListener('click', () => {
                 const email = btn.getAttribute('data-email');
+                const pass = btn.getAttribute('data-pass');
                 const role = btn.getAttribute('data-role');
+
                 const emailInput = document.getElementById('login-email');
-                if (emailInput) emailInput.value = email;
-                switchRole(role);
-                showToast(`Credenciales cargadas para: ${role}`, 'info');
-            });
-        });
+                const passInput = document.getElementById('login-password');
 
-        if (formLogin) {
-            formLogin.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('login-email').value;
-                const password = document.getElementById('login-password').value;
-
-                // Intentar auth real en backend
-                const authRes = await apiRequest('/api/auth/login', {
-                    method: 'POST',
-                    body: JSON.stringify({ email, password })
-                });
-
-                if (authRes && authRes.token) {
-                    state.currentUser.token = authRes.token;
-                    state.currentUser.email = email;
-                } else {
-                    // Fallback demo mode
-                    state.currentUser.token = `jwt-token-${Date.now()}`;
-                    state.currentUser.email = email;
+                if (emailInput) {
+                    emailInput.value = email;
+                    emailInput.classList.remove('is-invalid');
+                    emailInput.classList.add('is-valid');
+                    document.getElementById('login-email-error').textContent = '';
                 }
+                if (passInput) {
+                    passInput.value = pass;
+                    passInput.classList.remove('is-invalid');
+                    passInput.classList.add('is-valid');
+                    document.getElementById('login-password-error').textContent = '';
+                }
+                if (loginAlert) loginAlert.classList.add('hidden');
 
-                updateUserUI();
-                modalAuth.classList.add('hidden');
-                showToast(`Sesión iniciada correctamente como ${state.currentUser.email}`, 'success');
+                showToast(`Credenciales cargadas: ${role} (${email})`, 'info');
             });
-        }
-
-        if (formRegister) {
-            formRegister.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const name = document.getElementById('reg-name').value;
-                const email = document.getElementById('reg-email').value;
-                const role = document.getElementById('reg-role').value;
-
-                await apiRequest('/api/users', {
-                    method: 'POST',
-                    body: JSON.stringify({ name, email, role, password: 'Password123*' })
-                });
-
-                state.currentUser.name = name;
-                state.currentUser.email = email;
-                state.currentUser.role = role;
-                state.currentUser.token = `jwt-token-${Date.now()}`;
-
-                updateUserUI();
-                modalAuth.classList.add('hidden');
-                showToast(`¡Cuenta registrada exitosamente! Bienvenido ${name}`, 'success');
-            });
-        }
-
-        if (btnLogout) {
-            btnLogout.addEventListener('click', () => {
-                state.currentUser.token = '';
-                updateUserUI();
-                showToast('Has cerrado sesión.', 'info');
-            });
-        }
-
-        // 4. Validador de Cerca Geográfica de Santander
-        setupGeofenceValidator();
-    }
-
-    // =========================================================================
-    // CERCA GEOGRÁFICA INTERACTIVA & MAPA TELEMÁTICO SANTANDER (LEAFLET)
-    // =========================================================================
-    let geofenceMap = null;
-    let geofenceRouteLine = null;
-    let geofenceDestMarker = null;
-
-    const zoneCoords = {
-        bga: [7.1193, -73.1227],
-        florida: [7.0620, -73.0864],
-        giron: [7.0722, -73.1697],
-        piede: [6.9880, -73.0510],
-        lebrija: [7.1165, -73.2185],
-        barranca: [7.0653, -73.8547],
-        sangil: [6.5544, -73.1340]
-    };
-
-    const zoneMap = {
-        bga: {
-            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-            sub: 'Área Metropolitana de Bucaramanga • Despacho Habilitado',
-            depot: 'Patio Central Girón - Salida Palonegro',
-            time: '< 1.5 Horas',
-            freight: 'Tarifa Plana Metropolitana ($0 recargo)',
-            policy: 'Sura Obra Santander Vigente',
-            addr: 'Carrera 27 con Calle 36, Obra Centro, Bucaramanga'
-        },
-        florida: {
-            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-            sub: 'Área Metropolitana de Bucaramanga • Corredor Cañaveral/Menzuly',
-            depot: 'Patio Floridablanca (Valle de Menzuly)',
-            time: '< 1 Hora',
-            freight: 'Tarifa Plana Metropolitana ($0 recargo)',
-            policy: 'Sura Obra Santander Vigente',
-            addr: 'Autopista Floridablanca Km 4, Condominio Mensulí'
-        },
-        giron: {
-            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-            sub: 'Zona Industrial Chimitá • Salida Inmediata de Patios',
-            depot: 'Patio Central Girón (Anillo Vial Km 2.5)',
-            time: '< 45 Minutos',
-            freight: 'Despacho Directo en Parque ($0 recargo)',
-            policy: 'Sura Obra Santander Vigente',
-            addr: 'Anillo Vial Chimitá - Girón Km 2.5, Parque Industrial'
-        },
-        piede: {
-            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-            sub: 'Área Metropolitana de Bucaramanga • Sector Guatiguará',
-            depot: 'Patio Central Girón - Corredor Sur',
-            time: '< 2.5 Horas',
-            freight: 'Tarifa Plana Metropolitana ($0 recargo)',
-            policy: 'Sura Obra Santander Vigente',
-            addr: 'Vía Guatiguará Km 1.5, Zona de Expansión Piedecuesta'
-        },
-        lebrija: {
-            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-            sub: 'Corredor Palonegro • Cobertura Suburbana',
-            depot: 'Patio Central Girón - Vía Aeropuerto',
-            time: '< 3.5 Horas',
-            freight: 'Flete Suburbano Bonificado ($45.000 COP)',
-            policy: 'Sura Obra Santander Vigente',
-            addr: 'Sector Aeropuerto Palonegro, Entrada Lebrija'
-        },
-        barranca: {
-            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-            sub: 'Magdalena Medio • Equipos Pesados e Industriales',
-            depot: 'Sub-base Satélite Barrancabermeja - Vía Yuma',
-            time: '< 6 Horas',
-            freight: 'Flete Industrial Regional ($180.000 COP)',
-            policy: 'Póliza Ecopetrol/Sura Obra Vigente',
-            addr: 'Vía Yuma Km 12, Sector El Centro, Barrancabermeja'
-        },
-        sangil: {
-            title: 'DENTRO DE LA CERCA GEOGRÁFICA ACTIVA',
-            sub: 'Provincia Guanentá • Despacho Programado en Camabaja',
-            depot: 'Punto de Enlace San Gil - Vía Nacional',
-            time: '< 8 Horas',
-            freight: 'Flete Intermunicipal Programado ($220.000 COP)',
-            policy: 'Sura Obra Santander Vigente',
-            addr: 'Avenida 19 # 12-40, Obra Vía San Gil - Barichara'
-        }
-    };
-
-    function initGeofenceMap() {
-        if (typeof L === 'undefined') return;
-        const container = document.getElementById('geofence-leaflet-map');
-        if (!container || geofenceMap) return;
-
-        geofenceMap = L.map('geofence-leaflet-map', {
-            center: [7.0722, -73.14],
-            zoom: 11,
-            zoomControl: false,
-            attributionControl: false
         });
 
-        L.control.zoom({ position: 'bottomright' }).addTo(geofenceMap);
+        // Mostrar / Ocultar contraseñas con el botón de ojo
+        document.querySelectorAll('.btn-toggle-pwd').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                if (!input) return;
+                const eyeOpen = btn.querySelector('.eye-open');
+                const eyeClosed = btn.querySelector('.eye-closed');
 
-        // Capa de Mapa CartoDB Positron / OSM
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19,
-            subdomains: 'abcd'
-        }).addTo(geofenceMap);
-
-        // 1. Polígono Cerca Principal AMB (Bucaramanga, Floridablanca, Girón, Piedecuesta)
-        const ambCoords = [
-            [7.175, -73.155],
-            [7.165, -73.110],
-            [7.140, -73.090],
-            [7.085, -73.080],
-            [7.050, -73.070],
-            [6.980, -73.040],
-            [6.960, -73.060],
-            [6.970, -73.095],
-            [7.020, -73.150],
-            [7.060, -73.185],
-            [7.110, -73.195],
-            [7.160, -73.180]
-        ];
-
-        const ambPoly = L.polygon(ambCoords, {
-            color: '#10b981',
-            weight: 2,
-            dashArray: '6, 4',
-            fillColor: '#10b981',
-            fillOpacity: 0.12
-        }).addTo(geofenceMap);
-
-        ambPoly.bindTooltip('<b>Cerca Geográfica Principal AMB</b><br>Flete $0 Bonificado • Despacho &lt; 2.5h', {
-            sticky: true
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    if (eyeOpen) eyeOpen.classList.add('hidden');
+                    if (eyeClosed) eyeClosed.classList.remove('hidden');
+                } else {
+                    input.type = 'password';
+                    if (eyeOpen) eyeOpen.classList.remove('hidden');
+                    if (eyeClosed) eyeClosed.classList.add('hidden');
+                }
+            });
         });
 
-        // 2. Polígono Cerca Satélite Santander (Lebrija, Barrancabermeja, San Gil)
-        const santanderCoords = [
-            [7.25, -73.30],
-            [7.22, -73.05],
-            [7.10, -72.95],
-            [6.50, -73.05],
-            [6.50, -73.25],
-            [7.00, -73.90],
-            [7.15, -73.90],
-            [7.25, -73.30]
-        ];
+        // Selección Exclusiva de Rol en Registro (SOLO Cliente o Proveedor)
+        const cardClient = document.getElementById('card-role-client');
+        const cardProvider = document.getElementById('card-role-provider');
+        const btnSubmitRegister = document.getElementById('btn-submit-register');
 
-        L.polygon(santanderCoords, {
-            color: '#0284c7',
-            weight: 1.5,
-            dashArray: '4, 6',
-            fillColor: '#0284c7',
-            fillOpacity: 0.03
-        }).addTo(geofenceMap);
-
-        // 3. Marcador Patio Central Girón
-        const hubIcon = L.divIcon({
-            className: 'custom-hub-marker',
-            html: '<span class="hub-pulse-ring"></span><span class="hub-core"></span>',
-            iconSize: [28, 28],
-            iconAnchor: [14, 14]
-        });
-
-        const hubMarker = L.marker([7.0722, -73.1697], { icon: hubIcon }).addTo(geofenceMap);
-        hubMarker.bindPopup(`
-            <div class="geo-popup-title">
-                Patio Central Girón
-                <span class="geo-popup-badge badge-hub">HUB PRINCIPAL</span>
-            </div>
-            <div class="geo-popup-body">
-                Centro de despacho primario y taller 24/7. 32 equipos pesados y 4 camabajas operativas.
-            </div>
-            <div class="geo-popup-meta">
-                📍 Anillo Vial Chimitá - Girón Km 2.5<br>
-                ⏱️ Despacho express a todo el AMB
-            </div>
-        `);
-
-        // 4. Marcadores de Flota GPS en Obra
-        const fleetData = [
-            { id: 'CAT-420F2', coords: [7.078, -73.152], name: 'Retroexcavadora CAT 420F2', loc: 'Girón (Anillo Vial)', status: 'Operando • 84% Combustible', speed: '0 km/h' },
-            { id: 'Bobcat-S570', coords: [7.062, -73.105], name: 'Minicargador Bobcat S570', loc: 'Floridablanca (Ruitoque)', status: 'En Obra • Telemetría OK', speed: '3.2 km/h' },
-            { id: 'Bosch-GSH27', coords: [7.121, -73.114], name: 'Martillo Demoledor Bosch GSH 27', loc: 'Bucaramanga (Cabecera)', status: 'Alquilado • Frente Activo', speed: 'Fijo' },
-            { id: 'Sakai-SV525', coords: [6.995, -73.055], name: 'Rodillo Compactador Sakai SV525', loc: 'Piedecuesta (Guatiguará)', status: 'En Compactación • 92% Combustible', speed: '4.8 km/h' },
-            { id: 'Cummins-100kVA', coords: [7.065, -73.855], name: 'Generador Diésel Cummins 100kVA', loc: 'Barrancabermeja (Yuma)', status: 'Base Satélite • Suministro Continuo', speed: 'Estacionario' }
-        ];
-
-        fleetData.forEach(item => {
-            const fleetIcon = L.divIcon({
-                className: 'custom-fleet-marker',
-                html: '<span class="fleet-ping"></span><span class="fleet-core"></span>',
-                iconSize: [22, 22],
-                iconAnchor: [11, 11]
-            });
-
-            const m = L.marker(item.coords, { icon: fleetIcon }).addTo(geofenceMap);
-            m.bindPopup(`
-                <div class="geo-popup-title">
-                    ${item.id}
-                    <span class="geo-popup-badge">GPS ONLINE</span>
-                </div>
-                <div class="geo-popup-body">
-                    <strong>${item.name}</strong><br>
-                    Ubicación: ${item.loc}<br>
-                    Estado: ${item.status}
-                </div>
-                <div class="geo-popup-meta">
-                    🛰️ Lat: ${item.coords[0].toFixed(4)}, Lng: ${item.coords[1].toFixed(4)}<br>
-                    Velocidad: ${item.speed}
-                </div>
-            `);
-        });
-
-        // 5. Botones de Control de la Barra de Herramientas
-        const btnAmb = document.getElementById('btn-map-amb');
-        const btnGiron = document.getElementById('btn-map-giron');
-        const btnFleet = document.getElementById('btn-map-fleet');
-        const btnAll = document.getElementById('btn-map-all');
-
-        function setActiveToolBtn(btn) {
-            document.querySelectorAll('.geofence-tool-btn').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
+        function updateRoleSelection(selectedRole) {
+            if (selectedRole === 'CLIENT') {
+                if (cardClient) cardClient.classList.add('active');
+                if (cardProvider) cardProvider.classList.remove('active');
+                const radio = cardClient ? cardClient.querySelector('input[type="radio"]') : null;
+                if (radio) radio.checked = true;
+                if (btnSubmitRegister) {
+                    btnSubmitRegister.querySelector('span').textContent = 'Crear Cuenta de Cliente Contratista';
+                }
+            } else if (selectedRole === 'PROVIDER') {
+                if (cardProvider) cardProvider.classList.add('active');
+                if (cardClient) cardClient.classList.remove('active');
+                const radio = cardProvider ? cardProvider.querySelector('input[type="radio"]') : null;
+                if (radio) radio.checked = true;
+                if (btnSubmitRegister) {
+                    btnSubmitRegister.querySelector('span').textContent = 'Crear Cuenta de Proveedor de Equipos';
+                }
+            }
         }
 
-        if (btnAmb) {
-            btnAmb.addEventListener('click', () => {
-                setActiveToolBtn(btnAmb);
-                geofenceMap.flyTo([7.0722, -73.14], 12, { duration: 1 });
-            });
-        }
-        if (btnGiron) {
-            btnGiron.addEventListener('click', () => {
-                setActiveToolBtn(btnGiron);
-                geofenceMap.flyTo([7.0722, -73.1697], 15, { duration: 1.2 });
-                hubMarker.openPopup();
-            });
-        }
-        if (btnFleet) {
-            btnFleet.addEventListener('click', () => {
-                setActiveToolBtn(btnFleet);
-                geofenceMap.flyTo([7.07, -73.13], 12, { duration: 1 });
-            });
-        }
-        if (btnAll) {
-            btnAll.addEventListener('click', () => {
-                setActiveToolBtn(btnAll);
-                geofenceMap.flyTo([6.95, -73.35], 9, { duration: 1.2 });
-            });
+        if (cardClient) cardClient.addEventListener('click', () => updateRoleSelection('CLIENT'));
+        if (cardProvider) cardProvider.addEventListener('click', () => updateRoleSelection('PROVIDER'));
+
+        function isValidEmail(email) {
+            return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email.trim());
         }
 
-        // Trazar destino inicial
-        const select = document.getElementById('geofence-municipality-select');
-        if (select) {
-            updateMapDestination(select.value);
-        }
-    }
+        // Medidor y Requisitos de Contraseña Segura
+        const regPassInput = document.getElementById('reg-password');
+        const strengthMeterFill = document.getElementById('strength-meter-fill');
+        const strengthLabel = document.getElementById('strength-label');
+        const reqLength = document.getElementById('req-length');
+        const reqUpper = document.getElementById('req-upper');
+        const reqNumber = document.getElementById('req-number');
+        const reqSpecial = document.getElementById('req-special');
 
-    function updateMapDestination(zoneKey) {
-        if (!geofenceMap || typeof L === 'undefined') return;
-        const targetCoords = zoneCoords[zoneKey] || zoneCoords.bga;
-        const depotCoords = [7.0722, -73.1697]; // Patio Girón
+        function checkPasswordQuality(pwd) {
+            const hasLen = pwd.length >= 8;
+            const hasUp = /[A-Z]/.test(pwd);
+            const hasNum = /[0-9]/.test(pwd);
+            const hasSpec = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd);
 
-        if (geofenceRouteLine) {
-            geofenceMap.removeLayer(geofenceRouteLine);
-            geofenceRouteLine = null;
-        }
-        if (geofenceDestMarker) {
-            geofenceMap.removeLayer(geofenceDestMarker);
-            geofenceDestMarker = null;
-        }
-
-        if (zoneKey !== 'giron') {
-            geofenceRouteLine = L.polyline([depotCoords, targetCoords], {
-                color: '#0284c7',
-                weight: 3,
-                dashArray: '6, 6',
-                opacity: 0.85
-            }).addTo(geofenceMap);
-        }
-
-        const destIcon = L.divIcon({
-            className: 'custom-dest-marker',
-            html: '<span class="dest-pulse-ring"></span><span class="dest-core"></span>',
-            iconSize: [26, 26],
-            iconAnchor: [13, 13]
-        });
-
-        geofenceDestMarker = L.marker(targetCoords, { icon: destIcon }).addTo(geofenceMap);
-
-        if (zoneKey === 'barranca' || zoneKey === 'sangil') {
-            geofenceMap.flyTo(targetCoords, 11, { duration: 1.2 });
-        } else {
-            geofenceMap.flyTo(targetCoords, 13, { duration: 1 });
-        }
-    }
-
-    function setupGeofenceValidator() {
-        const select = document.getElementById('geofence-municipality-select');
-        const addressInput = document.getElementById('geofence-address-input');
-        const btnRentNow = document.getElementById('btn-geo-rent-now');
-
-        function updateGeofenceDisplay() {
-            if (!select) return;
-            const data = zoneMap[select.value] || zoneMap.bga;
-
-            const titleEl = document.getElementById('geo-status-title');
-            const subEl = document.getElementById('geo-status-sub');
-            const depotEl = document.getElementById('geo-depot-val');
-            const timeEl = document.getElementById('geo-time-val');
-            const freightEl = document.getElementById('geo-freight-val');
-            const policyEl = document.getElementById('geo-policy-val');
-
-            if (titleEl) titleEl.textContent = data.title;
-            if (subEl) subEl.textContent = data.sub;
-            if (depotEl) depotEl.textContent = data.depot;
-            if (timeEl) timeEl.textContent = data.time;
-            if (freightEl) freightEl.textContent = data.freight;
-            if (policyEl) policyEl.textContent = data.policy;
-
-            if (addressInput && !addressInput.value) {
-                addressInput.value = data.addr;
+            if (reqLength) {
+                reqLength.classList.toggle('met', hasLen);
+                reqLength.querySelector('.req-dot').textContent = hasLen ? '✓' : '✕';
+            }
+            if (reqUpper) {
+                reqUpper.classList.toggle('met', hasUp);
+                reqUpper.querySelector('.req-dot').textContent = hasUp ? '✓' : '✕';
+            }
+            if (reqNumber) {
+                reqNumber.classList.toggle('met', hasNum);
+                reqNumber.querySelector('.req-dot').textContent = hasNum ? '✓' : '✕';
+            }
+            if (reqSpecial) {
+                reqSpecial.classList.toggle('met', hasSpec);
+                reqSpecial.querySelector('.req-dot').textContent = hasSpec ? '✓' : '✕';
             }
 
-            // Actualizar tarjeta de zona activa
-            document.querySelectorAll('.zone-pill-card').forEach(card => {
-                const z = card.getAttribute('data-zone');
-                if (z) {
-                    const isActive = (z === select.value) || (z === 'bga' && ['bga', 'florida', 'giron', 'piede'].includes(select.value));
-                    card.classList.toggle('active-zone', isActive);
-                }
-            });
+            let score = 0;
+            if (hasLen) score++;
+            if (hasUp) score++;
+            if (hasNum) score++;
+            if (hasSpec) score++;
 
-            // Actualizar destino en el mapa Leaflet
-            updateMapDestination(select.value);
+            if (strengthMeterFill && strengthLabel) {
+                if (pwd.length === 0) {
+                    strengthMeterFill.style.width = '0%';
+                    strengthMeterFill.style.backgroundColor = '#e2e8f0';
+                    strengthLabel.textContent = 'Ingresa tu contraseña';
+                    strengthLabel.style.color = '#94a3b8';
+                } else if (score <= 1) {
+                    strengthMeterFill.style.width = '25%';
+                    strengthMeterFill.style.backgroundColor = '#ef4444';
+                    strengthLabel.textContent = 'Contraseña Débil (No cumple requisitos mínimos)';
+                    strengthLabel.style.color = '#ef4444';
+                } else if (score === 2) {
+                    strengthMeterFill.style.width = '50%';
+                    strengthMeterFill.style.backgroundColor = '#f97316';
+                    strengthLabel.textContent = 'Contraseña Regular';
+                    strengthLabel.style.color = '#f97316';
+                } else if (score === 3) {
+                    strengthMeterFill.style.width = '75%';
+                    strengthMeterFill.style.backgroundColor = '#eab308';
+                    strengthLabel.textContent = 'Contraseña Buena';
+                    strengthLabel.style.color = '#ca8a04';
+                } else {
+                    strengthMeterFill.style.width = '100%';
+                    strengthMeterFill.style.backgroundColor = '#10b981';
+                    strengthLabel.textContent = 'Contraseña Fuerte y Segura';
+                    strengthLabel.style.color = '#059669';
+                }
+            }
+
+            return score >= 3 && hasLen;
         }
 
-        if (select) {
-            select.addEventListener('change', () => {
-                if (addressInput && zoneMap[select.value]) {
-                    addressInput.value = zoneMap[select.value].addr;
-                }
-                updateGeofenceDisplay();
-                showToast(`Cerca Geográfica: ${select.options[select.selectedIndex].text} verificada.`, 'success', 2500);
+        if (regPassInput) {
+            regPassInput.addEventListener('input', () => {
+                checkPasswordQuality(regPassInput.value);
             });
         }
 
-        // Clic en tarjetas de zonas rápidas
-        document.querySelectorAll('.zone-pill-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const zone = card.getAttribute('data-zone');
-                if (zone && select) {
-                    select.value = zone;
-                    if (addressInput && zoneMap[zone]) {
-                        addressInput.value = zoneMap[zone].addr;
+        // Validación en tiempo real de coincidencia de contraseña
+        const regPassConfirmInput = document.getElementById('reg-password-confirm');
+        const regPassConfirmError = document.getElementById('reg-password-confirm-error');
+
+        function checkPasswordMatch() {
+            if (!regPassConfirmInput || !regPassInput) return true;
+            if (!regPassConfirmInput.value) {
+                regPassConfirmInput.classList.remove('is-valid', 'is-invalid');
+                if (regPassConfirmError) regPassConfirmError.textContent = '';
+                return false;
+            }
+            if (regPassConfirmInput.value === regPassInput.value) {
+                regPassConfirmInput.classList.add('is-valid');
+                regPassConfirmInput.classList.remove('is-invalid');
+                if (regPassConfirmError) regPassConfirmError.textContent = '';
+                return true;
+            } else {
+                regPassConfirmInput.classList.add('is-invalid');
+                regPassConfirmInput.classList.remove('is-valid');
+                if (regPassConfirmError) regPassConfirmError.textContent = 'Las contraseñas no coinciden.';
+                return false;
+            }
+        }
+
+        if (regPassConfirmInput) {
+            regPassConfirmInput.addEventListener('input', checkPasswordMatch);
+        }
+
+        // ================= ENVÍO FORMULARIO LOGIN =================
+        if (formLogin) {
+            formLogin.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const emailInput = document.getElementById('login-email');
+                const passwordInput = document.getElementById('login-password');
+                const email = emailInput.value.trim().toLowerCase();
+                const password = passwordInput.value;
+
+                let hasError = false;
+
+                if (!email || !isValidEmail(email)) {
+                    emailInput.classList.add('is-invalid');
+                    document.getElementById('login-email-error').textContent = 'Ingresa un correo electrónico válido.';
+                    hasError = true;
+                } else {
+                    emailInput.classList.remove('is-invalid');
+                    emailInput.classList.add('is-valid');
+                    document.getElementById('login-email-error').textContent = '';
+                }
+
+                if (!password) {
+                    passwordInput.classList.add('is-invalid');
+                    document.getElementById('login-password-error').textContent = 'Ingresa tu contraseña.';
+                    hasError = true;
+                } else {
+                    passwordInput.classList.remove('is-invalid');
+                    passwordInput.classList.add('is-valid');
+                    document.getElementById('login-password-error').textContent = '';
+                }
+
+                if (hasError) return;
+
+                // Buscar usuario en semillas del README o registrados en localStorage
+                const allUsers = [...SYSTEM_ACCOUNTS, ...getStoredUsers()];
+                const foundUser = allUsers.find(u => u.email.toLowerCase() === email);
+
+                if (!foundUser || foundUser.password !== password) {
+                    if (loginAlert) {
+                        loginAlert.textContent = 'Credenciales inválidas. Verifica tu correo y contraseña o usa una cuenta oficial del README.';
+                        loginAlert.classList.remove('hidden');
                     }
-                    updateGeofenceDisplay();
-                    showToast(`Zona seleccionada: ${card.querySelector('h4').textContent}`, 'info');
+                    emailInput.classList.add('is-invalid');
+                    passwordInput.classList.add('is-invalid');
+                    return;
+                }
+
+                if (loginAlert) loginAlert.classList.add('hidden');
+
+                state.currentUser = {
+                    id: foundUser.id,
+                    name: foundUser.name,
+                    email: foundUser.email,
+                    role: foundUser.role,
+                    token: `jwt-auth-session-${Date.now()}`
+                };
+
+                try {
+                    localStorage.setItem('rentatools_active_session', JSON.stringify(state.currentUser));
+                } catch (err) {}
+
+                updateUserUI();
+                modalAuth.classList.add('hidden');
+
+                // Redirección contextual según el rol de la cuenta
+                if (foundUser.role === 'ADMIN') {
+                    switchTab('section-analytics');
+                    showToast(`Sesión iniciada como Administrador: ${foundUser.name}`, 'success');
+                } else if (foundUser.role === 'PROVIDER') {
+                    switchTab('section-provider');
+                    showToast(`Sesión iniciada como Proveedor: ${foundUser.name}`, 'success');
+                } else {
+                    switchTab('section-catalog');
+                    showToast(`Bienvenido a RentaTools Santander, ${foundUser.name}`, 'success');
+                }
+            });
+        }
+
+        // ================= ENVÍO FORMULARIO REGISTRO =================
+        if (formRegister) {
+            formRegister.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const nameInput = document.getElementById('reg-name');
+                const emailInput = document.getElementById('reg-email');
+                const passInput = document.getElementById('reg-password');
+                const passConfirmInput = document.getElementById('reg-password-confirm');
+                const termsCheckbox = document.getElementById('reg-terms');
+
+                const selectedRoleRadio = document.querySelector('input[name="reg-role-radio"]:checked');
+                // SEGURIDAD ESTRICTA: Solo se permite CLIENT o PROVIDER (NUNCA ADMIN)
+                let selectedRole = selectedRoleRadio ? selectedRoleRadio.value : 'CLIENT';
+                if (selectedRole !== 'CLIENT' && selectedRole !== 'PROVIDER') {
+                    selectedRole = 'CLIENT';
+                }
+
+                let hasError = false;
+
+                // Validación Nombre
+                const name = nameInput.value.trim();
+                if (!name || name.length < 3) {
+                    nameInput.classList.add('is-invalid');
+                    document.getElementById('reg-name-error').textContent = 'El nombre o razón social debe tener al menos 3 caracteres.';
+                    hasError = true;
+                } else {
+                    nameInput.classList.remove('is-invalid');
+                    nameInput.classList.add('is-valid');
+                    document.getElementById('reg-name-error').textContent = '';
+                }
+
+                // Validación Correo
+                const email = emailInput.value.trim().toLowerCase();
+                const allUsers = [...SYSTEM_ACCOUNTS, ...getStoredUsers()];
+                const isTaken = allUsers.some(u => u.email.toLowerCase() === email);
+
+                if (!email || !isValidEmail(email)) {
+                    emailInput.classList.add('is-invalid');
+                    document.getElementById('reg-email-error').textContent = 'Ingresa un correo electrónico empresarial válido.';
+                    hasError = true;
+                } else if (isTaken || email === 'admin@rentatools.com') {
+                    emailInput.classList.add('is-invalid');
+                    document.getElementById('reg-email-error').textContent = 'Este correo ya está registrado o reservado por el sistema.';
+                    hasError = true;
+                } else {
+                    emailInput.classList.remove('is-invalid');
+                    emailInput.classList.add('is-valid');
+                    document.getElementById('reg-email-error').textContent = '';
+                }
+
+                // Validación Contraseña
+                const password = passInput.value;
+                const isPassStrong = checkPasswordQuality(password);
+                if (!isPassStrong) {
+                    passInput.classList.add('is-invalid');
+                    document.getElementById('reg-password-error').textContent = 'La contraseña debe tener mínimo 8 caracteres, mayúscula, número y símbolo.';
+                    hasError = true;
+                } else {
+                    passInput.classList.remove('is-invalid');
+                    passInput.classList.add('is-valid');
+                    document.getElementById('reg-password-error').textContent = '';
+                }
+
+                // Validación Confirmación de Contraseña
+                if (passConfirmInput.value !== password) {
+                    passConfirmInput.classList.add('is-invalid');
+                    document.getElementById('reg-password-confirm-error').textContent = 'Las contraseñas no coinciden.';
+                    hasError = true;
+                } else {
+                    passConfirmInput.classList.remove('is-invalid');
+                    passConfirmInput.classList.add('is-valid');
+                    document.getElementById('reg-password-confirm-error').textContent = '';
+                }
+
+                // Validación Términos
+                if (!termsCheckbox.checked) {
+                    document.getElementById('reg-terms-error').textContent = 'Debes aceptar los términos y condiciones de servicio en Santander.';
+                    hasError = true;
+                } else {
+                    document.getElementById('reg-terms-error').textContent = '';
+                }
+
+                if (hasError) {
+                    if (registerAlert) {
+                        registerAlert.textContent = 'Por favor corrige los campos señalados en rojo antes de continuar.';
+                        registerAlert.classList.remove('hidden');
+                    }
+                    return;
+                }
+
+                if (registerAlert) registerAlert.classList.add('hidden');
+
+                // Registrar nuevo usuario exclusivamente como Cliente o Proveedor
+                const newUser = {
+                    id: `usr-${Date.now()}`,
+                    name: name,
+                    email: email,
+                    password: password,
+                    role: selectedRole
+                };
+
+                saveRegisteredUser(newUser);
+
+                // Iniciar sesión inmediatamente con la cuenta recién creada
+                state.currentUser = {
+                    id: newUser.id,
+                    name: newUser.name,
+                    email: newUser.email,
+                    role: newUser.role,
+                    token: `jwt-registered-${Date.now()}`
+                };
+
+                try {
+                    localStorage.setItem('rentatools_active_session', JSON.stringify(state.currentUser));
+                } catch (err) {}
+
+                updateUserUI();
+                modalAuth.classList.add('hidden');
+
+                if (selectedRole === 'PROVIDER') {
+                    switchTab('section-provider');
+                    showToast(`¡Cuenta de Proveedor creada con éxito! Bienvenido, ${name}.`, 'success');
+                } else {
+                    switchTab('section-catalog');
+                    showToast(`¡Cuenta de Cliente creada con éxito! Bienvenido, ${name}.`, 'success');
+                }
+
+                formRegister.reset();
+                checkPasswordQuality('');
+            });
+        }
+
+        // ================= CERRAR SESIÓN =================
+        if (btnLogout) {
+            btnLogout.addEventListener('click', () => {
+                state.currentUser = null;
+                try {
+                    localStorage.removeItem('rentatools_active_session');
+                } catch (err) {}
+                updateUserUI();
+                switchTab('section-catalog');
+                showToast('Has cerrado sesión exitosamente.', 'info');
+            });
+        }
+    }
+
+    function initMobileNav() {
+        const toggleBtn = document.getElementById('btn-mobile-toggle');
+        const mobilePanel = document.getElementById('mobile-nav-panel');
+        const opsContainer = document.getElementById('mobile-cluster-ops');
+        const bizContainer = document.getElementById('mobile-cluster-biz');
+
+        if (!toggleBtn || !mobilePanel) return;
+
+        // Toggle drawer
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = mobilePanel.classList.toggle('open');
+            toggleBtn.classList.toggle('active', isOpen);
+            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        // Cerrar al hacer clic fuera del panel
+        document.addEventListener('click', (e) => {
+            if (mobilePanel.classList.contains('open') && !mobilePanel.contains(e.target) && !toggleBtn.contains(e.target)) {
+                mobilePanel.classList.remove('open');
+                toggleBtn.classList.remove('active');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Población del cluster de operaciones móvil
+        if (opsContainer && opsContainer.children.length === 0) {
+            const opsItems = [
+                { target: 'section-catalog', icon: '📦', text: 'Catálogo de Maquinaria' },
+                { target: 'section-coverage', icon: '🗺️', text: 'Cobertura GPS & Cerca' },
+                { target: 'section-client-rentals', icon: '📋', text: 'Mis Alquileres' }
+            ];
+
+            opsItems.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-tab';
+                btn.setAttribute('data-target', item.target);
+                btn.innerHTML = `<span class="nav-icon">${item.icon}</span> <span class="nav-text">${item.text}</span>`;
+                btn.addEventListener('click', () => {
+                    switchTab(item.target);
+                });
+                opsContainer.appendChild(btn);
+            });
+        }
+
+        // Población del cluster de negocio móvil
+        if (bizContainer && bizContainer.children.length === 0) {
+            const bizItems = [
+                { target: 'section-provider', icon: '🏗️', text: 'Panel Proveedor', badge: 'Flota' },
+                { target: 'section-analytics', icon: '📊', text: 'Métricas & BI', badge: 'Admin' }
+            ];
+
+            bizItems.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-tab nav-tab-pro';
+                btn.setAttribute('data-target', item.target);
+                btn.innerHTML = `<span class="nav-icon">${item.icon}</span> <span class="nav-text">${item.text}</span> <span class="nav-badge-pro">${item.badge}</span>`;
+                btn.addEventListener('click', () => {
+                    switchTab(item.target);
+                });
+                bizContainer.appendChild(btn);
+            });
+        }
+    }
+
+    // =========================================================================
+    // MAPA ANIMADO DE ZONAS DE PROYECTO & LOGÍSTICA SANTANDER (SIN APIs)
+    // =========================================================================
+
+    const SANTANDER_PROJECT_SITES = {
+        giron: {
+            badge: 'HUB LOGÍSTICO CENTRAL',
+            title: 'Patio Central Girón (Anillo Vial Chimitá)',
+            desc: 'Base de operaciones principal, parque automotor con 32 equipos y 4 camabajas para despacho continuo en Santander.',
+            eta: '< 45 Minutos',
+            fleet: '32 Equipos en Patio',
+            freight: 'Flete Bonificado ($0 COP)',
+            insurance: 'Sura Obra Santander Vigente',
+            tools: [
+                '🚜 <strong>Retroexcavadora CAT 420F2</strong> • Movimiento de Tierras',
+                '🏗️ <strong>Minicargador Bobcat S570</strong> • Obras Urbanas',
+                '💥 <strong>Martillo Bosch GSH 27 VC</strong> • Demolición de Pavimento'
+            ]
+        },
+        bga: {
+            badge: 'ÁREA METROPOLITANA',
+            title: 'Bucaramanga (Cabecera, Centro & Provenza)',
+            desc: 'Frente de proyectos residenciales de altura, mantenimiento de vías urbanas y adecuación comercial en la meseta.',
+            eta: '< 1.5 Horas',
+            fleet: '12 Equipos Asignados',
+            freight: 'Tarifa Plana ($0 COP)',
+            insurance: 'Póliza AMB Cobertura Total',
+            tools: [
+                '💥 <strong>Martillo Bosch GSH 27 VC</strong> • Demolición Estructural',
+                '🚜 <strong>Retroexcavadora CAT 420F2</strong> • Cimentación de Edificios',
+                '⚡ <strong>Generador Cummins 100kVA</strong> • Respaldo Eléctrico'
+            ]
+        },
+        florida: {
+            badge: 'CORREDOR SUR AMB',
+            title: 'Floridablanca (Cañaveral & Valle de Mensulí)',
+            desc: 'Desarrollos comerciales, conjuntos campestres y frentes de pavimentación en Autopista y Ruitoque Condominio.',
+            eta: '< 1.0 Hora',
+            fleet: '8 Equipos en Operación',
+            freight: 'Tarifa Plana ($0 COP)',
+            insurance: 'Sura Obra Santander Vigente',
+            tools: [
+                '🚜 <strong>Rodillo Compactador Vibromak 1.5 Ton</strong> • Pavimento y Asfalto',
+                '🏗️ <strong>Minicargador Bobcat S570</strong> • Movimiento de Materiales',
+                '🪜 <strong>Plataforma Tijera Genie GS-2646</strong> • Fachadas y Alturas'
+            ]
+        },
+        piede: {
+            badge: 'ZONA DE EXPANSIÓN',
+            title: 'Piedecuesta (Guatiguará & Barroblanco)',
+            desc: 'Sector de macroproyectos habitacionales, parques logísticos y canalizaciones de aguas pluviales en Guatiguará.',
+            eta: '< 2.0 Horas',
+            fleet: '6 Equipos en Operación',
+            freight: 'Tarifa Plana ($0 COP)',
+            insurance: 'Sura Obra Santander Vigente',
+            tools: [
+                '🚜 <strong>Retroexcavadora CAT 420F2</strong> • Excavaciones Masivas',
+                '🚜 <strong>Rodillo Compactador Vibromak</strong> • Rasantes Viales',
+                '💡 <strong>Torre de Iluminación LED Móvil</strong> • Turnos Nocturnos'
+            ]
+        },
+        barranca: {
+            badge: 'MAGDALENA MEDIO INDUSTRIAL',
+            title: 'Barrancabermeja (Base Satélite Yuma)',
+            desc: 'Corredor petroquímico e industrial con suministro de generadores pesados, compresores y maquinaria de gran tonelaje.',
+            eta: '< 5.0 Horas',
+            fleet: '9 Equipos Asignados',
+            freight: 'Flete Industrial Regional Bonificado',
+            insurance: 'Póliza Ecopetrol / Sura Vigente',
+            tools: [
+                '⚡ <strong>Generador Diésel Cummins 100kVA</strong> • Operación Continua',
+                '🚜 <strong>Retroexcavadora CAT 420F2</strong> • Mantenimiento de Líneas',
+                '🪜 <strong>Plataforma Tijera Genie GS-2646</strong> • Montajes Industriales'
+            ]
+        },
+        lebrija: {
+            badge: 'CORREDOR AEROPUERTO',
+            title: 'Lebrija (Sector Palonegro & Aeropuerto)',
+            desc: 'Mantenimiento aeroportuario, vías suburbanas y explanaciones de terrenos en el occidente de Santander.',
+            eta: '< 2.5 Horas',
+            fleet: '5 Equipos Disponibles',
+            freight: 'Flete Suburbano Bonificado ($45.000 COP)',
+            insurance: 'Sura Obra Santander Vigente',
+            tools: [
+                '🏗️ <strong>Minicargador Bobcat S570</strong> • Rasantes de Vía',
+                '🚜 <strong>Retroexcavadora CAT 420F2</strong> • Movimiento de Tierras',
+                '💥 <strong>Martillo Bosch GSH 27 VC</strong> • Rotura de Concreto'
+            ]
+        }
+    };
+
+    let activeRadarSiteKey = 'giron';
+
+    function selectRadarSite(siteKey) {
+        const site = SANTANDER_PROJECT_SITES[siteKey];
+        if (!site) return;
+
+        activeRadarSiteKey = siteKey;
+
+        // Actualizar panel interactivo
+        const badgeEl = document.getElementById('project-zone-badge');
+        const titleEl = document.getElementById('project-site-title');
+        const descEl = document.getElementById('project-site-desc');
+        const etaEl = document.getElementById('project-eta-val');
+        const fleetEl = document.getElementById('project-fleet-val');
+        const freightEl = document.getElementById('project-freight-val');
+        const insuranceEl = document.getElementById('project-insurance-val');
+        const listEl = document.getElementById('project-tools-deployed-list');
+
+        if (badgeEl) badgeEl.textContent = site.badge;
+        if (titleEl) titleEl.textContent = site.title;
+        if (descEl) descEl.textContent = site.desc;
+        if (etaEl) etaEl.textContent = site.eta;
+        if (fleetEl) fleetEl.textContent = site.fleet;
+        if (freightEl) freightEl.textContent = site.freight;
+        if (insuranceEl) insuranceEl.textContent = site.insurance;
+
+        if (listEl) {
+            listEl.innerHTML = site.tools.map(t => `<li>${t}</li>`).join('');
+        }
+
+        // Resaltar botón píldora
+        document.querySelectorAll('.site-pill-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-site') === siteKey);
+        });
+
+        // Resaltar pin en el SVG animado
+        document.querySelectorAll('.project-pin-group.site-pin').forEach(pin => {
+            const isMatch = pin.getAttribute('data-site') === siteKey;
+            pin.style.transform = isMatch ? 'scale(1.15)' : 'scale(1)';
+            const circle = pin.querySelector('circle');
+            if (circle) {
+                pin.style.transformOrigin = `${circle.getAttribute('cx')}px ${circle.getAttribute('cy')}px`;
+            }
+            pin.style.transition = 'transform 0.25s ease';
+        });
+    }
+
+    function setupProjectRadarMap() {
+        // Clics en pines del mapa vectorial SVG
+        document.querySelectorAll('.project-pin-group.site-pin').forEach(pin => {
+            pin.addEventListener('click', () => {
+                const siteKey = pin.getAttribute('data-site');
+                if (siteKey) {
+                    selectRadarSite(siteKey);
+                    showToast(`Frente de Obra: ${SANTANDER_PROJECT_SITES[siteKey]?.title}`, 'info', 2000);
                 }
             });
         });
 
-        if (btnRentNow) {
-            btnRentNow.addEventListener('click', () => {
+        // Clics en botones rápidos del selector
+        document.querySelectorAll('.site-pill-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const siteKey = btn.getAttribute('data-site');
+                if (siteKey) {
+                    selectRadarSite(siteKey);
+                }
+            });
+        });
+
+        // Botón "Rentar Maquinaria para este Frente de Obra"
+        const btnRentSite = document.getElementById('btn-rent-for-site');
+        if (btnRentSite) {
+            btnRentSite.addEventListener('click', () => {
+                const site = SANTANDER_PROJECT_SITES[activeRadarSiteKey];
                 switchTab('section-catalog');
-                showToast('Selecciona el equipo para tu obra en Santander.', 'info');
+                showToast(`Mostrando equipos disponibles para despacho a: ${site?.title}`, 'success');
             });
         }
 
-        updateGeofenceDisplay();
+        // Seleccionar sitio inicial por defecto
+        selectRadarSite(activeRadarSiteKey);
     }
 
-    // Inicialización Principal de la Aplicación
+    // =========================================================================
+    // INICIALIZACIÓN PRINCIPAL DE LA APLICACIÓN
+    // =========================================================================
+
     document.addEventListener('DOMContentLoaded', () => {
         updateUserUI();
         renderCatalog();
@@ -1698,7 +2392,6 @@
         renderAnalytics();
         updateRentalsBadge();
         initEventListeners();
-        initGeofenceMap();
 
         // Sincronización asíncrona con el backend si está corriendo
         syncCatalogWithBackend();
