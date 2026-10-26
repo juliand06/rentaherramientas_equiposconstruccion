@@ -100,11 +100,34 @@
                             <span class="nav-text">Métricas &amp; BI</span>
                             <span class="nav-badge-pro">Admin</span>
                         </button>
+                        <button class="nav-tab nav-tab-pro" data-target="section-devoluciones" id="tab-devoluciones" title="Examen 1.5H: Registro de Devolución y Reporte de Daños">
+                            <span class="nav-icon">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                                    <path d="M21 3v5h-5"/>
+                                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                                    <path d="M8 16H3v5"/>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Devolución &amp; Daños</span>
+                            <span class="nav-badge-pro" style="background:#e11d48; color:#fff; font-weight:700;">Examen 1.5H</span>
+                        </button>
                     </div>
                 </nav>
 
                 <!-- Herramientas y Acciones Derechas -->
                 <div class="header-right-tools">
+                    <!-- Acceso Directo a Swagger UI -->
+                    <a href="/swagger-ui/index.html" target="_blank" class="btn-swagger-link" title="Abrir documentación Swagger OpenAPI">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                        <span>Swagger UI</span>
+                    </a>
+
                     <!-- Acciones de Usuario & Autenticación -->
                     <div class="header-user-actions">
                         <div id="auth-guest-box" class="auth-guest-box">
@@ -781,6 +804,261 @@
                 </div>
             </section>
 
+            <!-- ============================================================= -->
+            <!-- SECCIÓN 6: EXAMEN 1.5H - REGISTRO DE DEVOLUCIÓN Y DAÑOS      -->
+            <!-- ============================================================= -->
+            <section id="section-devoluciones" class="content-section">
+                <!-- Hero Banner Examen -->
+                <div class="devolucion-hero-card">
+                    <div class="devolucion-hero-badge">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                        <span>Examen 1.5H • Flujo de Cierre de Alquiler</span>
+                    </div>
+                    <h2 class="devolucion-hero-title">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                            <path d="M21 3v5h-5"/>
+                            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                            <path d="M8 16H3v5"/>
+                        </svg>
+                        Registro de Devolución &amp; Reporte de Daños
+                    </h2>
+                    <p class="devolucion-hero-desc">
+                        Implementación del ciclo final de vida del alquiler. El proveedor inspecciona la maquinaria retornada, marca el estado de la devolución (<strong>DEVUELTO_OK</strong> o <strong>DEVUELTO_CON_DAÑOS</strong>) y opcionalmente registra el informe técnico de daños con el costo estimado de reparación en la base de datos PostgreSQL.
+                    </p>
+                    <div class="devolucion-pills-row">
+                        <div class="devolucion-pill">
+                            <span>Endpoint:</span> <strong>POST /api/reservas/{id}/registrar-devolucion</strong>
+                        </div>
+                        <div class="devolucion-pill">
+                            <span>Entidad Nueva:</span> <strong>ReporteDano (descripcion, costoReparacion, fechaReporte)</strong>
+                        </div>
+                        <div class="devolucion-pill">
+                            <span>Entidad Reserva:</span> <strong>estadoDevolucion (PENDIENTE, OK, DAÑOS)</strong>
+                        </div>
+                        <div class="devolucion-pill">
+                            <span>Seguridad:</span> <strong>hasAnyRole('PROVIDER', 'ADMIN')</strong>
+                        </div>
+                        <a href="/swagger-ui/index.html" target="_blank" class="devolucion-pill" style="text-decoration:none; color:#10b981; border-color: rgba(16,185,129,0.4);">
+                            <span>Documentación:</span> <strong>Swagger OpenAPI ↗</strong>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Notificación de Autenticación Rápida como Proveedor -->
+                <div id="devolucion-auth-banner" class="glass-card" style="margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; border-left:4px solid #d97706; background:#fffbeb;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:1.3rem;">🔐</span>
+                        <div>
+                            <strong style="color:#92400e; font-size:0.9rem;">Acceso de Proveedor Requerido por Spring Security</strong>
+                            <p style="margin:2px 0 0 0; font-size:0.8rem; color:#b45309;" id="devolucion-auth-status-text">
+                                Sesión actual: <span id="devolucion-current-user-badge">Iniciando...</span>. El endpoint requiere rol PROVIDER o ADMIN.
+                            </p>
+                        </div>
+                    </div>
+                    <button type="button" id="btn-quick-login-provider" class="btn-primary" style="padding:6px 14px; font-size:0.82rem; background:#d97706; border-color:#b45309;">
+                        Autenticar como Proveedor (contacto@maquinariaandina.com)
+                    </button>
+                </div>
+
+                <!-- Layout Principal 2 Columnas -->
+                <div class="devolucion-layout-grid">
+                    <!-- Columna Izquierda: Formulario de Inspección -->
+                    <div class="glass-card">
+                        <h3 class="card-heading">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10 9 9 9 8 9"/>
+                            </svg>
+                            Inspección Técnica de Recepción
+                        </h3>
+
+                        <form id="form-registro-devolucion">
+                            <!-- Selección de Reserva -->
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="dev-reserva-preset" class="form-label" style="display:flex; justify-content:space-between;">
+                                    <span>Seleccionar Contrato / Reserva:</span>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Seed del Backend</span>
+                                </label>
+                                <select id="dev-reserva-preset" class="form-input" style="width:100%; margin-bottom:8px;">
+                                    <option value="90000000-0000-0000-0000-000000000009">RES-2026-10009 — Compresor de Aire Sullair (PENDIENTE)</option>
+                                    <option value="90000000-0000-0000-0000-000000000010">RES-2026-10010 — Torre de Iluminación Wacker (PENDIENTE)</option>
+                                    <option value="90000000-0000-0000-0000-000000000013">RES-2026-10013 — Allanadora de Concreto Multiquip (PENDIENTE)</option>
+                                    <option value="90000000-0000-0000-0000-000000000014">RES-2026-10014 — Rodillo Compactador Dynapac (PENDIENTE)</option>
+                                    <option value="90000000-0000-0000-0000-000000000005">RES-2026-10005 — Martillo Hidráulico Bosch GSH (DEVUELTO CON DAÑOS)</option>
+                                    <option value="90000000-0000-0000-0000-000000000006">RES-2026-10006 — Plataforma Tijera Genie GS (DEVUELTO OK)</option>
+                                    <option value="90000000-0000-0000-0000-000000000008">RES-2026-10008 — Retroexcavadora John Deere 310L (DEVUELTO CON DAÑOS)</option>
+                                    <option value="CUSTOM">-- Ingresar ID o UUID manualmente --</option>
+                                </select>
+                                <div id="dev-reserva-manual-wrap" class="hidden">
+                                    <input type="text" id="dev-reserva-id" class="form-input" placeholder="Ej: 90000000-0000-0000-0000-000000000009" value="90000000-0000-0000-0000-000000000009" style="font-family:var(--font-mono); font-size:0.85rem;">
+                                </div>
+                            </div>
+
+                            <!-- Estado de Devolución (Selector Radio Interactivo) -->
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label class="form-label">Resultado de la Inspección (Estado Devolución):</label>
+                                <div class="inspection-status-selector">
+                                    <div class="inspection-radio-card status-ok active" id="card-status-ok" data-val="OK">
+                                        <div class="inspection-card-header">
+                                            <span>✓ DEVUELTO_OK</span>
+                                            <input type="radio" name="dev-estado-radio" value="OK" checked style="accent-color:#059669;">
+                                        </div>
+                                        <span class="inspection-card-sub">Sin novedades. La herramienta opera correctamente y no presenta daños.</span>
+                                    </div>
+                                    <div class="inspection-radio-card status-danos" id="card-status-danos" data-val="DAÑOS">
+                                        <div class="inspection-card-header">
+                                            <span>⚠ DEVUELTO_CON_DAÑOS</span>
+                                            <input type="radio" name="dev-estado-radio" value="DAÑOS" style="accent-color:#e11d48;">
+                                        </div>
+                                        <span class="inspection-card-sub">Presenta rotura, avería o pérdida de piezas. Requiere reporte de reparación.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bloque Condicional de Reporte de Daños -->
+                            <div id="dev-damage-fields" class="damage-box-animated hidden">
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2">
+                                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                        <line x1="12" y1="9" x2="12" y2="13"/>
+                                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                    </svg>
+                                    <h4 style="margin:0; font-size:0.92rem; color:#9f1239; font-weight:700;">Detalle de la Entidad ReporteDano</h4>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom:14px;">
+                                    <label for="dev-damage-desc" class="form-label" style="color:#9f1239;">
+                                        Descripción Técnica del Daño / Avería:
+                                    </label>
+                                    <textarea id="dev-damage-desc" class="form-input" rows="3" placeholder="Detalla las averías observadas en el equipo devuelto..."></textarea>
+                                    <div class="quick-chips-row">
+                                        <span class="chip-suggestion" data-text="Fuga de aceite hidráulico en cilindro y sobrecalentamiento">$ Fuga hidráulica</span>
+                                        <span class="chip-suggestion" data-text="Mandril atascado y rotura de cable de alimentación principal">$ Mandril y cable</span>
+                                        <span class="chip-suggestion" data-text="Fisura estructural en brazo articulado por sobreesfuerzo">$ Fisura de brazo</span>
+                                        <span class="chip-suggestion" data-text="Abolladura severa en capó y compuerta del motor">$ Golpe chasis</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom:6px;">
+                                    <label for="dev-damage-cost" class="form-label" style="color:#9f1239;">
+                                        Costo Estimado de Reparación (COP):
+                                    </label>
+                                    <input type="number" id="dev-damage-cost" class="form-input" placeholder="Ej: 350000" min="0" step="1000">
+                                    <div class="quick-chips-row">
+                                        <span class="chip-suggestion" data-cost="185000">$185.000 COP</span>
+                                        <span class="chip-suggestion" data-cost="350000">$350.000 COP</span>
+                                        <span class="chip-suggestion" data-cost="480000">$480.000 COP</span>
+                                        <span class="chip-suggestion" data-cost="750000">$750.000 COP</span>
+                                        <span class="chip-suggestion" data-cost="1200000">$1.200.000 COP</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botón de Envío -->
+                            <button type="submit" id="btn-submit-devolucion" class="btn-primary" style="width:100%; padding:12px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                <span>Registrar Devolución en Backend</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Columna Derecha: Tarjeta de Respuesta en Vivo & Inspección -->
+                    <div class="response-live-card">
+                        <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+                            <h3 class="card-heading" style="margin:0;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="16" x2="12" y2="12"/>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                </svg>
+                                Monitor de Ejecución API
+                            </h3>
+                            <span id="dev-http-status-badge" style="font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:999px; background:#f1f5f9; color:#64748b;">
+                                Esperando acción
+                            </span>
+                        </div>
+
+                        <!-- Panel de resultado estructurado -->
+                        <div id="dev-result-summary" style="display:flex; flex-direction:column; gap:12px;">
+                            <div style="background:var(--bg-surface-subtle); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:14px;">
+                                <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:700;">Estado de la Reserva</span>
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:6px;">
+                                    <span style="font-size:1.1rem; font-weight:800;" id="dev-res-id-display">--</span>
+                                    <span class="badge-return-pending" id="dev-res-status-display">PENDIENTE_DEVOLUCION</span>
+                                </div>
+                            </div>
+
+                            <div id="dev-damage-card-preview" class="damage-report-badge-card hidden">
+                                <div style="font-size:0.75rem; text-transform:uppercase; font-weight:800; letter-spacing:0.05em; margin-bottom:6px;">
+                                    📋 Entidad ReporteDano Registrada en PostgreSQL
+                                </div>
+                                <div style="font-size:0.85rem; line-height:1.4;">
+                                    <div><strong>Descripción:</strong> <span id="dev-preview-desc">--</span></div>
+                                    <div style="margin-top:4px;"><strong>Costo Reparación:</strong> <span id="dev-preview-cost" style="font-weight:800;">--</span></div>
+                                    <div style="margin-top:4px; font-size:0.75rem; color:#be123c;"><strong>Fecha Reporte:</strong> <span id="dev-preview-date">--</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- JSON Raw Viewer -->
+                        <div>
+                            <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:6px; display:block;">
+                                Payload / Respuesta JSON de la API:
+                            </span>
+                            <pre class="response-json-pre" id="dev-json-output">// Presiona "Registrar Devolución en Backend" para ver la respuesta en tiempo real de Spring Boot</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Historial de Reservas y Estado de Devolución -->
+                <div class="glass-card" style="margin-top:10px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+                        <div>
+                            <h3 class="card-heading" style="margin:0;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                                Matriz de Devoluciones &amp; Informes de Daños en Base de Datos
+                            </h3>
+                            <p style="margin:4px 0 0 0; font-size:0.82rem; color:var(--text-muted);">
+                                Registro vivo de los contratos y el estado de retorno de equipos en Santander.
+                            </p>
+                        </div>
+                        <button type="button" id="btn-refresh-devoluciones-table" class="btn-secondary" style="padding:6px 12px; font-size:0.8rem;">
+                            ↻ Actualizar Matriz
+                        </button>
+                    </div>
+
+                    <div class="table-exam-wrapper">
+                        <table class="table-exam">
+                            <thead>
+                                <tr>
+                                    <th>N° Reserva</th>
+                                    <th>UUID Reserva</th>
+                                    <th>Equipo / Herramienta</th>
+                                    <th>Estado Alquiler</th>
+                                    <th>Estado Devolución</th>
+                                    <th>Reporte Daño</th>
+                                    <th>Costo Reparación</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-devoluciones-tbody">
+                                <!-- Filas inyectadas vía JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
         </main>
 
         <!-- FOOTER CORPORATIVO PROFESIONAL SANTANDER -->
@@ -1014,6 +1292,11 @@
                             <span class="quick-role-dot dot-admin"></span>
                             <span class="quick-role-name">Admin (README)</span>
                             <span class="quick-email">admin@rentatools.com</span>
+                        </button>
+                        <button type="button" class="btn-quick-fill btn-quick-provider" data-email="contacto@maquinariaandina.com" data-pass="Password123!" data-role="PROVIDER" title="Proveedor Backend (Examen 1.5H)">
+                            <span class="quick-role-dot dot-provider"></span>
+                            <span class="quick-role-name">Proveedor Backend (Examen 1.5H)</span>
+                            <span class="quick-email">contacto@maquinariaandina.com</span>
                         </button>
                         <button type="button" class="btn-quick-fill btn-quick-provider" data-email="proveedor.equipos@maquinariacolombia.com" data-pass="Prov123456!" data-role="PROVIDER" title="Cuenta Proveedor del README">
                             <span class="quick-role-dot dot-provider"></span>

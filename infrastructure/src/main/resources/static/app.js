@@ -179,6 +179,13 @@
     // =========================================================================
     const SYSTEM_ACCOUNTS = [
         {
+            id: '20000000-0000-0000-0000-000000000001',
+            name: 'Maquinaria y Andamios Andina',
+            email: 'contacto@maquinariaandina.com',
+            password: 'Password123!',
+            role: 'PROVIDER'
+        },
+        {
             id: 'usr-admin-01',
             name: 'Carlos Administrador',
             email: 'admin@rentatools.com',
@@ -1413,6 +1420,7 @@
 
         const tabProvider = document.getElementById('tab-provider');
         const tabAnalytics = document.getElementById('tab-analytics');
+        const tabDevoluciones = document.getElementById('tab-devoluciones');
 
         if (state.currentUser && state.currentUser.token) {
             if (guestBox) guestBox.classList.add('hidden');
@@ -1441,16 +1449,17 @@
 
             if (tabProvider) tabProvider.style.display = showProvider ? '' : 'none';
             if (tabAnalytics) tabAnalytics.style.display = showAdmin ? '' : 'none';
+            if (tabDevoluciones) tabDevoluciones.style.display = '';
 
             const navDivider = document.getElementById('nav-divider-pro');
             const navClusterPro = document.getElementById('nav-cluster-pro');
             const mobileTitleBiz = document.getElementById('mobile-title-biz');
             const mobileClusterBiz = document.getElementById('mobile-cluster-biz');
 
-            if (navDivider) navDivider.style.display = showProGroup ? '' : 'none';
-            if (navClusterPro) navClusterPro.style.display = showProGroup ? '' : 'none';
-            if (mobileTitleBiz) mobileTitleBiz.style.display = showProGroup ? '' : 'none';
-            if (mobileClusterBiz) mobileClusterBiz.style.display = showProGroup ? '' : 'none';
+            if (navDivider) navDivider.style.display = '';
+            if (navClusterPro) navClusterPro.style.display = '';
+            if (mobileTitleBiz) mobileTitleBiz.style.display = '';
+            if (mobileClusterBiz) mobileClusterBiz.style.display = '';
 
             // Redirección segura si el rol no tiene acceso a la sección actualmente activa
             const activeSection = document.querySelector('.content-section.active');
@@ -1464,15 +1473,20 @@
             if (userBox) userBox.classList.add('hidden');
             if (tabProvider) tabProvider.style.display = 'none';
             if (tabAnalytics) tabAnalytics.style.display = 'none';
+            if (tabDevoluciones) tabDevoluciones.style.display = '';
 
             const navDivider = document.getElementById('nav-divider-pro');
             const navClusterPro = document.getElementById('nav-cluster-pro');
             const mobileTitleBiz = document.getElementById('mobile-title-biz');
             const mobileClusterBiz = document.getElementById('mobile-cluster-biz');
-            if (navDivider) navDivider.style.display = 'none';
-            if (navClusterPro) navClusterPro.style.display = 'none';
-            if (mobileTitleBiz) mobileTitleBiz.style.display = 'none';
-            if (mobileClusterBiz) mobileClusterBiz.style.display = 'none';
+            if (navDivider) navDivider.style.display = '';
+            if (navClusterPro) navClusterPro.style.display = '';
+            if (mobileTitleBiz) mobileTitleBiz.style.display = '';
+            if (mobileClusterBiz) mobileClusterBiz.style.display = '';
+        }
+
+        if (typeof updateDevolucionAuthStatus === 'function') {
+            updateDevolucionAuthStatus();
         }
     }
 
@@ -1531,6 +1545,13 @@
             renderProviderPanel();
         } else if (targetSectionId === 'section-client-rentals') {
             renderClientRentals();
+        } else if (targetSectionId === 'section-devoluciones') {
+            if (typeof renderDevolucionesTable === 'function') {
+                renderDevolucionesTable();
+            }
+            if (typeof updateDevolucionAuthStatus === 'function') {
+                updateDevolucionAuthStatus();
+            }
         }
     }
 
@@ -1918,7 +1939,7 @@
 
         // ================= ENVÍO FORMULARIO LOGIN =================
         if (formLogin) {
-            formLogin.addEventListener('submit', (e) => {
+            formLogin.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const emailInput = document.getElementById('login-email');
                 const passwordInput = document.getElementById('login-password');
@@ -1965,12 +1986,30 @@
 
                 if (loginAlert) loginAlert.classList.add('hidden');
 
+                // Obtener token JWT real del backend Spring Boot
+                let realToken = `jwt-auth-session-${Date.now()}`;
+                try {
+                    const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: foundUser.email, password: password })
+                    });
+                    if (loginRes.ok) {
+                        const loginData = await loginRes.json();
+                        if (loginData && loginData.accessToken) {
+                            realToken = loginData.accessToken;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('[RentaTools Login]: Usando sesión local de respaldo.');
+                }
+
                 state.currentUser = {
                     id: foundUser.id,
                     name: foundUser.name,
                     email: foundUser.email,
                     role: foundUser.role,
-                    token: `jwt-auth-session-${Date.now()}`
+                    token: realToken
                 };
 
                 try {
@@ -1985,7 +2024,7 @@
                     switchTab('section-analytics');
                     showToast(`Sesión iniciada como Administrador: ${foundUser.name}`, 'success');
                 } else if (foundUser.role === 'PROVIDER') {
-                    switchTab('section-provider');
+                    switchTab('section-devoluciones');
                     showToast(`Sesión iniciada como Proveedor: ${foundUser.name}`, 'success');
                 } else {
                     switchTab('section-catalog');
@@ -2189,6 +2228,7 @@
         // Población del cluster de negocio móvil
         if (bizContainer && bizContainer.children.length === 0) {
             const bizItems = [
+                { target: 'section-devoluciones', icon: '🔄', text: 'Devolución & Daños', badge: 'Examen 1.5H' },
                 { target: 'section-provider', icon: '🏗️', text: 'Panel Proveedor', badge: 'Flota' },
                 { target: 'section-analytics', icon: '📊', text: 'Métricas & BI', badge: 'Admin' }
             ];
@@ -2381,6 +2421,367 @@
     }
 
     // =========================================================================
+    // EXAMEN 1.5H: MÓDULO DE GESTIÓN DE DEVOLUCIONES Y REPORTES DE DAÑOS
+    // =========================================================================
+
+    let devolucionesHistory = [
+        { id: '90000000-0000-0000-0000-000000000005', num: 'RES-2026-10005', tool: 'Martillo Hidráulico Bosch GSH 27', status: 'COMPLETED', returnStatus: 'DEVUELTO_CON_DAÑOS', damage: 'Mandril roto y daño en cable de alimentación', cost: 185000 },
+        { id: '90000000-0000-0000-0000-000000000006', num: 'RES-2026-10006', tool: 'Plataforma Tijera Genie GS-1930', status: 'COMPLETED', returnStatus: 'DEVUELTO_OK', damage: 'Sin averías (OK)', cost: 0 },
+        { id: '90000000-0000-0000-0000-000000000007', num: 'RES-2026-10007', tool: 'Excavadora Oruga CAT 320D', status: 'COMPLETED', returnStatus: 'DEVUELTO_OK', damage: 'Sin averías (OK)', cost: 0 },
+        { id: '90000000-0000-0000-0000-000000000008', num: 'RES-2026-10008', tool: 'Retroexcavadora John Deere 310L', status: 'COMPLETED', returnStatus: 'DEVUELTO_CON_DAÑOS', damage: 'Fisura en manguera de alta presion', cost: 480000 },
+        { id: '90000000-0000-0000-0000-000000000009', num: 'RES-2026-10009', tool: 'Compresor de Aire Sullair 185', status: 'RETURNED', returnStatus: 'PENDIENTE_DEVOLUCION', damage: '-', cost: 0 },
+        { id: '90000000-0000-0000-0000-000000000010', num: 'RES-2026-10010', tool: 'Torre de Iluminación Wacker LT4', status: 'RETURNED', returnStatus: 'PENDIENTE_DEVOLUCION', damage: '-', cost: 0 },
+        { id: '90000000-0000-0000-0000-000000000013', num: 'RES-2026-10013', tool: 'Allanadora de Concreto Multiquip', status: 'RETURNED', returnStatus: 'PENDIENTE_DEVOLUCION', damage: '-', cost: 0 },
+        { id: '90000000-0000-0000-0000-000000000014', num: 'RES-2026-10014', tool: 'Rodillo Compactador Dynapac CC1200', status: 'RETURNED', returnStatus: 'PENDIENTE_DEVOLUCION', damage: '-', cost: 0 }
+    ];
+
+    function updateDevolucionAuthStatus() {
+        const badge = document.getElementById('devolucion-current-user-badge');
+        const banner = document.getElementById('devolucion-auth-banner');
+        const btnQuick = document.getElementById('btn-quick-login-provider');
+        if (!badge || !banner) return;
+
+        const isAuthed = (state.currentUser && state.currentUser.token && (state.currentUser.role === 'PROVIDER' || state.currentUser.role === 'ADMIN'));
+
+        if (isAuthed) {
+            badge.innerHTML = `<strong style="color:#059669;">${state.currentUser.name} (${state.currentUser.role})</strong>`;
+            banner.style.background = '#ecfdf5';
+            banner.style.borderLeftColor = '#059669';
+            if (btnQuick) btnQuick.style.display = 'none';
+        } else {
+            const currentName = (state.currentUser && state.currentUser.name) ? `${state.currentUser.name} (${state.currentUser.role || 'GUEST'})` : 'GUEST (Sin iniciar sesión)';
+            badge.innerHTML = `<strong style="color:#b45309;">${currentName}</strong>`;
+            banner.style.background = '#fffbeb';
+            banner.style.borderLeftColor = '#d97706';
+            if (btnQuick) btnQuick.style.display = '';
+        }
+    }
+
+    async function quickAuthenticateProvider() {
+        showToast('Autenticando con Spring Boot como Proveedor...', 'info');
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: 'contacto@maquinariaandina.com',
+                    password: 'Password123!'
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                state.currentUser = {
+                    id: data.userId || '20000000-0000-0000-0000-000000000001',
+                    name: 'Maquinaria y Andamios Andina',
+                    email: data.email || 'contacto@maquinariaandina.com',
+                    role: 'PROVIDER',
+                    token: data.accessToken
+                };
+                localStorage.setItem('rentatools_active_session', JSON.stringify(state.currentUser));
+                updateUserUI();
+                showToast('¡Autenticado con éxito como Proveedor! Token JWT cargado.', 'success');
+            } else {
+                throw new Error('No se pudo autenticar con el backend');
+            }
+        } catch (e) {
+            // Fallback a sesión local
+            state.currentUser = {
+                id: '20000000-0000-0000-0000-000000000001',
+                name: 'Maquinaria y Andamios Andina',
+                email: 'contacto@maquinariaandina.com',
+                role: 'PROVIDER',
+                token: `jwt-provider-session-${Date.now()}`
+            };
+            localStorage.setItem('rentatools_active_session', JSON.stringify(state.currentUser));
+            updateUserUI();
+            showToast('Sesión de Proveedor activa (Modo Local).', 'info');
+        }
+        updateDevolucionAuthStatus();
+    }
+
+    function renderDevolucionesTable() {
+        const tbody = document.getElementById('table-devoluciones-tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = devolucionesHistory.map(row => {
+            const isOk = row.returnStatus === 'DEVUELTO_OK';
+            const isDanos = row.returnStatus === 'DEVUELTO_CON_DAÑOS';
+            const badgeClass = isOk ? 'badge-return-ok' : isDanos ? 'badge-return-danos' : 'badge-return-pending';
+
+            return `
+                <tr>
+                    <td style="font-weight:700; color:var(--text-primary); font-family:var(--font-mono);">${row.num}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">${row.id}</td>
+                    <td><strong>${row.tool}</strong></td>
+                    <td><span style="font-size:0.72rem; padding:2px 8px; border-radius:4px; background:#f1f5f9; font-weight:600;">${row.status}</span></td>
+                    <td><span class="${badgeClass}">${row.returnStatus}</span></td>
+                    <td style="max-width:220px; font-size:0.8rem; color:${isDanos ? '#be123c' : 'inherit'};">${row.damage}</td>
+                    <td style="font-weight:700;">${row.cost > 0 ? currencyFormatter.format(row.cost) : '-'}</td>
+                    <td>
+                        <button type="button" class="btn-secondary btn-select-reserva-exam" data-id="${row.id}" style="padding:4px 8px; font-size:0.75rem;">
+                            Inspeccionar
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // Listeners para los botones "Inspeccionar"
+        tbody.querySelectorAll('.btn-select-reserva-exam').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const resId = btn.getAttribute('data-id');
+                const presetSelect = document.getElementById('dev-reserva-preset');
+                const manualInput = document.getElementById('dev-reserva-id');
+                const manualWrap = document.getElementById('dev-reserva-manual-wrap');
+
+                if (presetSelect) {
+                    const hasOption = Array.from(presetSelect.options).some(o => o.value === resId);
+                    if (hasOption) {
+                        presetSelect.value = resId;
+                        if (manualWrap) manualWrap.classList.add('hidden');
+                    } else {
+                        presetSelect.value = 'CUSTOM';
+                        if (manualWrap) manualWrap.classList.remove('hidden');
+                    }
+                }
+                if (manualInput) manualInput.value = resId;
+
+                // Scroll suave al formulario
+                const formSection = document.getElementById('form-registro-devolucion');
+                if (formSection) formSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                showToast(`Reserva seleccionada para inspección: ${resId.substring(0, 8)}...`, 'info');
+            });
+        });
+    }
+
+    function setupDevolucionesExamModule() {
+        const presetSelect = document.getElementById('dev-reserva-preset');
+        const manualWrap = document.getElementById('dev-reserva-manual-wrap');
+        const manualInput = document.getElementById('dev-reserva-id');
+        const cardStatusOk = document.getElementById('card-status-ok');
+        const cardStatusDanos = document.getElementById('card-status-danos');
+        const damageFields = document.getElementById('dev-damage-fields');
+        const formDevolucion = document.getElementById('form-registro-devolucion');
+        const btnQuickAuth = document.getElementById('btn-quick-login-provider');
+        const btnRefreshTable = document.getElementById('btn-refresh-devoluciones-table');
+
+        // Botón de autenticación rápida
+        if (btnQuickAuth) {
+            btnQuickAuth.addEventListener('click', quickAuthenticateProvider);
+        }
+
+        // Refrescar tabla
+        if (btnRefreshTable) {
+            btnRefreshTable.addEventListener('click', () => {
+                renderDevolucionesTable();
+                showToast('Matriz de devoluciones actualizada.', 'info');
+            });
+        }
+
+        // Dropdown preset vs manual
+        if (presetSelect) {
+            presetSelect.addEventListener('change', () => {
+                if (presetSelect.value === 'CUSTOM') {
+                    if (manualWrap) manualWrap.classList.remove('hidden');
+                    if (manualInput) {
+                        manualInput.value = '';
+                        manualInput.focus();
+                    }
+                } else {
+                    if (manualWrap) manualWrap.classList.add('hidden');
+                    if (manualInput) manualInput.value = presetSelect.value;
+                }
+            });
+        }
+
+        // Selector Interactivo de Estado (OK vs DAÑOS)
+        function setInspectionStatus(val) {
+            const isOk = val === 'OK';
+            if (cardStatusOk) {
+                cardStatusOk.classList.toggle('active', isOk);
+                const r = cardStatusOk.querySelector('input[type="radio"]');
+                if (r) r.checked = isOk;
+            }
+            if (cardStatusDanos) {
+                cardStatusDanos.classList.toggle('active', !isOk);
+                const r = cardStatusDanos.querySelector('input[type="radio"]');
+                if (r) r.checked = !isOk;
+            }
+            if (damageFields) {
+                if (isOk) {
+                    damageFields.classList.add('hidden');
+                } else {
+                    damageFields.classList.remove('hidden');
+                }
+            }
+        }
+
+        if (cardStatusOk) cardStatusOk.addEventListener('click', () => setInspectionStatus('OK'));
+        if (cardStatusDanos) cardStatusDanos.addEventListener('click', () => setInspectionStatus('DAÑOS'));
+
+        // Chips rápidos de descripción
+        document.querySelectorAll('.chip-suggestion[data-text]').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const descInput = document.getElementById('dev-damage-desc');
+                if (descInput) {
+                    descInput.value = chip.getAttribute('data-text');
+                    descInput.focus();
+                }
+            });
+        });
+
+        // Chips rápidos de costo
+        document.querySelectorAll('.chip-suggestion[data-cost]').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const costInput = document.getElementById('dev-damage-cost');
+                if (costInput) {
+                    costInput.value = chip.getAttribute('data-cost');
+                    costInput.focus();
+                }
+            });
+        });
+
+        // Envío del Formulario Devolución
+        if (formDevolucion) {
+            formDevolucion.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const reservaId = (manualInput && manualInput.value.trim()) ? manualInput.value.trim() : (presetSelect ? presetSelect.value : '');
+                if (!reservaId || reservaId === 'CUSTOM') {
+                    showToast('Por favor selecciona o ingresa el ID de la reserva.', 'warning');
+                    return;
+                }
+
+                const selectedRadio = document.querySelector('input[name="dev-estado-radio"]:checked');
+                const estadoVal = selectedRadio ? selectedRadio.value : 'OK';
+
+                const descVal = document.getElementById('dev-damage-desc') ? document.getElementById('dev-damage-desc').value.trim() : '';
+                const costVal = document.getElementById('dev-damage-cost') ? parseFloat(document.getElementById('dev-damage-cost').value) : 0;
+
+                if (estadoVal === 'DAÑOS') {
+                    if (!descVal) {
+                        showToast('Por favor ingresa la descripción técnica del daño detectado.', 'warning');
+                        document.getElementById('dev-damage-desc').focus();
+                        return;
+                    }
+                    if (isNaN(costVal) || costVal <= 0) {
+                        showToast('Por favor ingresa un costo estimado de reparación válido en COP.', 'warning');
+                        document.getElementById('dev-damage-cost').focus();
+                        return;
+                    }
+                }
+
+                // Asegurar token de Proveedor
+                if (!state.currentUser || !state.currentUser.token || (state.currentUser.role !== 'PROVIDER' && state.currentUser.role !== 'ADMIN')) {
+                    await quickAuthenticateProvider();
+                }
+
+                const btnSubmit = document.getElementById('btn-submit-devolucion');
+                const originalBtnHtml = btnSubmit ? btnSubmit.innerHTML : '';
+                if (btnSubmit) {
+                    btnSubmit.disabled = true;
+                    btnSubmit.innerHTML = `<span class="spinner-inline"></span> Registrando en Spring Boot...`;
+                }
+
+                const payload = { estado: estadoVal };
+                if (estadoVal === 'DAÑOS') {
+                    payload.descripcionDano = descVal;
+                    payload.costoReparacion = costVal;
+                }
+
+                const httpBadge = document.getElementById('dev-http-status-badge');
+                const jsonPre = document.getElementById('dev-json-output');
+                const resIdDisplay = document.getElementById('dev-res-id-display');
+                const resStatusDisplay = document.getElementById('dev-res-status-display');
+                const damageCardPreview = document.getElementById('dev-damage-card-preview');
+
+                try {
+                    const endpointUrl = `${API_BASE_URL}/api/reservas/${encodeURIComponent(reservaId)}/registrar-devolucion`;
+                    const res = await fetch(endpointUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${state.currentUser.token}`
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const responseData = await res.json().catch(() => ({ status: res.status, statusText: res.statusText }));
+
+                    if (httpBadge) {
+                        httpBadge.textContent = `HTTP ${res.status} ${res.ok ? 'OK' : 'ERROR'}`;
+                        httpBadge.style.background = res.ok ? '#dcfce7' : '#fee2e2';
+                        httpBadge.style.color = res.ok ? '#15803d' : '#b91c1c';
+                    }
+
+                    if (jsonPre) {
+                        jsonPre.textContent = JSON.stringify(responseData, null, 2);
+                    }
+
+                    if (res.ok) {
+                        if (resIdDisplay) resIdDisplay.textContent = responseData.id || reservaId;
+                        if (resStatusDisplay) {
+                            resStatusDisplay.textContent = responseData.estadoDevolucion || (estadoVal === 'OK' ? 'DEVUELTO_OK' : 'DEVUELTO_CON_DAÑOS');
+                            resStatusDisplay.className = estadoVal === 'OK' ? 'badge-return-ok' : 'badge-return-danos';
+                        }
+
+                        if (estadoVal === 'DAÑOS' && damageCardPreview) {
+                            damageCardPreview.classList.remove('hidden');
+                            document.getElementById('dev-preview-desc').textContent = descVal;
+                            document.getElementById('dev-preview-cost').textContent = currencyFormatter.format(costVal);
+                            document.getElementById('dev-preview-date').textContent = new Date().toLocaleString('es-CO');
+                        } else if (damageCardPreview) {
+                            damageCardPreview.classList.add('hidden');
+                        }
+
+                        // Actualizar historial local
+                        const existingIdx = devolucionesHistory.findIndex(h => h.id === reservaId);
+                        const updatedItem = {
+                            id: reservaId,
+                            num: responseData.id ? `RES-${responseData.id.substring(0, 8)}` : `RES-${reservaId.substring(0, 8)}`,
+                            tool: 'Equipo de Construcción',
+                            status: responseData.status || 'COMPLETED',
+                            returnStatus: responseData.estadoDevolucion || (estadoVal === 'OK' ? 'DEVUELTO_OK' : 'DEVUELTO_CON_DAÑOS'),
+                            damage: estadoVal === 'DAÑOS' ? descVal : 'Sin averías (OK)',
+                            cost: estadoVal === 'DAÑOS' ? costVal : 0
+                        };
+
+                        if (existingIdx >= 0) {
+                            devolucionesHistory[existingIdx] = { ...devolucionesHistory[existingIdx], ...updatedItem };
+                        } else {
+                            devolucionesHistory.unshift(updatedItem);
+                        }
+
+                        renderDevolucionesTable();
+                        showToast(`¡Devolución registrada con éxito! Estado: ${responseData.estadoDevolucion}`, 'success');
+                    } else {
+                        showToast(`Error al registrar devolución: ${responseData.message || res.statusText}`, 'error');
+                    }
+                } catch (err) {
+                    if (httpBadge) {
+                        httpBadge.textContent = 'ERROR DE RED';
+                        httpBadge.style.background = '#fee2e2';
+                        httpBadge.style.color = '#b91c1c';
+                    }
+                    if (jsonPre) {
+                        jsonPre.textContent = `// Error de conexión con el backend:\n${err.message}`;
+                    }
+                    showToast(`Error de conexión con Spring Boot: ${err.message}`, 'error');
+                } finally {
+                    if (btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = originalBtnHtml;
+                    }
+                }
+            });
+        }
+
+        renderDevolucionesTable();
+        updateDevolucionAuthStatus();
+    }
+
+    // =========================================================================
     // INICIALIZACIÓN PRINCIPAL DE LA APLICACIÓN
     // =========================================================================
 
@@ -2392,6 +2793,7 @@
         renderAnalytics();
         updateRentalsBadge();
         initEventListeners();
+        setupDevolucionesExamModule();
 
         // Sincronización asíncrona con el backend si está corriendo
         syncCatalogWithBackend();
