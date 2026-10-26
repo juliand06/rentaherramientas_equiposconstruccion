@@ -26,6 +26,9 @@ public class ReservationJpaEntity {
     @Column(nullable = false, length = 25)
     private String status;
 
+    @Column(name = "estado_devolucion", length = 50)
+    private String estadoDevolucion;
+
     @Column(name = "total_rental_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalRentalAmount;
 
@@ -60,7 +63,7 @@ public class ReservationJpaEntity {
     protected ReservationJpaEntity() {
     }
 
-    public ReservationJpaEntity(UUID id, UUID clientId, String reservationNumber, String status,
+    public ReservationJpaEntity(UUID id, UUID clientId, String reservationNumber, String status, String estadoDevolucion,
                                 BigDecimal totalRentalAmount, BigDecimal totalDepositAmount,
                                 Instant expiresAt, String cancelledReason,
                                 LocalDate startDate, LocalDate endDate, BigDecimal dailyRate, UUID toolId,
@@ -69,6 +72,7 @@ public class ReservationJpaEntity {
         this.clientId = clientId;
         this.reservationNumber = reservationNumber;
         this.status = status;
+        this.estadoDevolucion = estadoDevolucion != null ? estadoDevolucion : "PENDIENTE_DEVOLUCION";
         this.totalRentalAmount = totalRentalAmount;
         this.totalDepositAmount = totalDepositAmount;
         this.expiresAt = expiresAt;
@@ -81,10 +85,20 @@ public class ReservationJpaEntity {
         this.updatedAt = updatedAt;
     }
 
+    public ReservationJpaEntity(UUID id, UUID clientId, String reservationNumber, String status,
+                                BigDecimal totalRentalAmount, BigDecimal totalDepositAmount,
+                                Instant expiresAt, String cancelledReason,
+                                LocalDate startDate, LocalDate endDate, BigDecimal dailyRate, UUID toolId,
+                                Instant createdAt, Instant updatedAt) {
+        this(id, clientId, reservationNumber, status, "PENDIENTE_DEVOLUCION", totalRentalAmount, totalDepositAmount,
+                expiresAt, cancelledReason, startDate, endDate, dailyRate, toolId, createdAt, updatedAt);
+    }
+
     public UUID getId() { return id; }
     public UUID getClientId() { return clientId; }
     public String getReservationNumber() { return reservationNumber; }
     public String getStatus() { return status; }
+    public String getEstadoDevolucion() { return estadoDevolucion; }
     public BigDecimal getTotalRentalAmount() { return totalRentalAmount; }
     public BigDecimal getTotalDepositAmount() { return totalDepositAmount; }
     public Instant getExpiresAt() { return expiresAt; }

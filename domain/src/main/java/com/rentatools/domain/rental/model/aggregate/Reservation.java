@@ -33,6 +33,7 @@ public class Reservation extends AggregateRoot<ReservationId> {
     private final Money totalRentalAmount;
     private final Money depositAmount;
     private ReservationStatus status;
+    private EstadoDevolucion estadoDevolucion;
     private final Instant createdAt;
     private Instant updatedAt;
 
@@ -44,6 +45,7 @@ public class Reservation extends AggregateRoot<ReservationId> {
             Money dailyRate,
             Money depositAmount,
             ReservationStatus status,
+            EstadoDevolucion estadoDevolucion,
             Instant createdAt,
             Instant updatedAt
     ) {
@@ -55,6 +57,7 @@ public class Reservation extends AggregateRoot<ReservationId> {
         this.depositAmount = Objects.requireNonNull(depositAmount, "El depósito de garantía no puede ser nulo");
         this.totalRentalAmount = this.dailyRate.multiply(this.rentalPeriod.totalDays());
         this.status = Objects.requireNonNull(status, "El estado no puede ser nulo");
+        this.estadoDevolucion = estadoDevolucion != null ? estadoDevolucion : EstadoDevolucion.PENDIENTE_DEVOLUCION;
         this.createdAt = Objects.requireNonNull(createdAt, "La fecha de creación no puede ser nula");
         this.updatedAt = Objects.requireNonNull(updatedAt, "La fecha de actualización no puede ser nula");
     }
@@ -76,6 +79,7 @@ public class Reservation extends AggregateRoot<ReservationId> {
                 dailyRate,
                 depositAmount,
                 ReservationStatus.PENDING,
+                EstadoDevolucion.PENDIENTE_DEVOLUCION,
                 now,
                 now
         );
@@ -92,6 +96,32 @@ public class Reservation extends AggregateRoot<ReservationId> {
             Instant createdAt,
             Instant updatedAt
     ) {
+        return restore(
+                id,
+                clientId,
+                toolId,
+                rentalPeriod,
+                dailyRate,
+                depositAmount,
+                status,
+                EstadoDevolucion.PENDIENTE_DEVOLUCION,
+                createdAt,
+                updatedAt
+        );
+    }
+
+    public static Reservation restore(
+            ReservationId id,
+            UserId clientId,
+            ToolId toolId,
+            DateRange rentalPeriod,
+            Money dailyRate,
+            Money depositAmount,
+            ReservationStatus status,
+            EstadoDevolucion estadoDevolucion,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
         return new Reservation(
                 id,
                 clientId,
@@ -100,9 +130,16 @@ public class Reservation extends AggregateRoot<ReservationId> {
                 dailyRate,
                 depositAmount,
                 status,
+                estadoDevolucion,
                 createdAt,
                 updatedAt
         );
+    }
+
+    public void registrarDevolucion(EstadoDevolucion estado, Instant now) {
+        this.estadoDevolucion = Objects.requireNonNull(estado, "El estado de devolución no puede ser nulo");
+        this.status = ReservationStatus.COMPLETED;
+        this.updatedAt = Objects.requireNonNull(now, "La fecha de actualización no puede ser nula");
     }
 
     public void confirm(Instant now) {
@@ -164,6 +201,10 @@ public class Reservation extends AggregateRoot<ReservationId> {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public EstadoDevolucion getEstadoDevolucion() {
+        return estadoDevolucion != null ? estadoDevolucion : EstadoDevolucion.PENDIENTE_DEVOLUCION;
     }
 
     public Instant getCreatedAt() {

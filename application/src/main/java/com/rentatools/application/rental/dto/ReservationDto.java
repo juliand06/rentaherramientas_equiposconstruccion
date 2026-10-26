@@ -18,9 +18,27 @@ public record ReservationDto(
         BigDecimal totalRentalAmount,
         BigDecimal depositAmount,
         String status,
+        String estadoDevolucion,
         Instant createdAt,
         Instant updatedAt
 ) {
+
+    public ReservationDto(
+            UUID id,
+            UUID clientId,
+            UUID toolId,
+            LocalDate startDate,
+            LocalDate endDate,
+            long totalDays,
+            BigDecimal dailyRate,
+            BigDecimal totalRentalAmount,
+            BigDecimal depositAmount,
+            String status,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        this(id, clientId, toolId, startDate, endDate, totalDays, dailyRate, totalRentalAmount, depositAmount, status, "PENDIENTE_DEVOLUCION", createdAt, updatedAt);
+    }
 
     public static ReservationDto from(Reservation res) {
         return new ReservationDto(
@@ -34,6 +52,7 @@ public record ReservationDto(
                 res.getTotalRentalAmount().amount(),
                 res.getDepositAmount().amount(),
                 res.getStatus().name(),
+                res.getEstadoDevolucion().name(),
                 res.getCreatedAt(),
                 res.getUpdatedAt()
         );

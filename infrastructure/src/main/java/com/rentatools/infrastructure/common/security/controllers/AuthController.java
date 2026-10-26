@@ -6,6 +6,8 @@ import com.rentatools.infrastructure.common.security.dtos.RefreshTokenRequest;
 import com.rentatools.infrastructure.common.security.dtos.RefreshTokenResponse;
 import com.rentatools.infrastructure.common.security.jwt.JwtTokenService;
 import com.rentatools.infrastructure.common.security.userdetails.CustomUserDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "Autenticación", description = "Endpoints de autenticación JWT y refresco de tokens")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -32,6 +35,7 @@ public class AuthController {
         this.jwtTokenService = jwtTokenService;
     }
 
+    @Operation(summary = "Iniciar sesión", description = "Autentica credenciales de usuario y genera Access Token y Refresh Token JWT")
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         Authentication auth = authenticationManager.authenticate(
@@ -57,6 +61,7 @@ public class AuthController {
         ));
     }
 
+    @Operation(summary = "Refrescar token", description = "Genera un nuevo par de tokens a partir de un Refresh Token válido")
     @PostMapping("/refresh")
     public ResponseEntity<RefreshTokenResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
         if (!jwtTokenService.validateToken(request.refreshToken())) {

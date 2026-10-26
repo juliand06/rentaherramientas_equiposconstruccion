@@ -14,12 +14,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * Configuración OpenAPI 3.x (springdoc) según la guía de documentación Swagger del profesor.
+ * Configuración OpenAPI 3.x (springdoc) para documentación y ejecución Swagger UI.
  */
 @Configuration
 public class OpenApiConfig {
 
-    private static final String SECURITY_SCHEME_NAME = "Bearer Authentication";
+    private static final String SECURITY_SCHEME_NAME = "bearerAuth";
 
     @Bean
     public OpenAPI customOpenAPI() {
@@ -27,7 +27,7 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("Plataforma de Renta de Herramientas y Equipos de Construcción — API")
                         .version("1.0.0")
-                        .description("API REST para la gestión integral de alquiler de maquinaria, inventarios, reservas y pagos electrónicos (Arquitectura Hexagonal + DDD).")
+                        .description("API REST para la gestión integral de alquiler de maquinaria, inventarios, reservas, devoluciones con reporte de daños y pagos electrónicos (Arquitectura Hexagonal + DDD).")
                         .contact(new Contact()
                                 .name("Julián Andrés Ricaurte")
                                 .email("andreyricaurte10@gmail.com"))
@@ -42,6 +42,6 @@ public class OpenApiConfig {
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
                                 .bearerFormat("JWT")
-                                .description("Ingrese el token JWT con prefijo Bearer para autenticar las peticiones.")));
+                                .description("Ingrese el token JWT obtenido en /api/auth/login para autorizar operaciones protegidas.")));
     }
 }

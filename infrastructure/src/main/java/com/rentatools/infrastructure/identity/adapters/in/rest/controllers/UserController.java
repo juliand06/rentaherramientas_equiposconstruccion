@@ -5,6 +5,10 @@ import com.rentatools.application.identity.dto.UserDto;
 import com.rentatools.application.identity.usecase.GetUserProfileUseCase;
 import com.rentatools.application.identity.usecase.RegisterUserUseCase;
 import com.rentatools.infrastructure.identity.adapters.in.rest.dtos.RegisterUserRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+@Tag(name = "Usuarios", description = "Gestión de identidad, perfiles y registro de usuarios")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -29,6 +34,7 @@ public class UserController {
         this.getUserProfile = getUserProfile;
     }
 
+    @Operation(summary = "Registrar nuevo usuario", description = "Permite registrar un usuario con rol CLIENT o PROVIDER")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto register(@Valid @RequestBody RegisterUserRequest request) {
@@ -41,8 +47,9 @@ public class UserController {
         ));
     }
 
+    @Operation(summary = "Consultar perfil de usuario", description = "Obtiene los detalles del usuario por su ID", security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/{id}")
-    public UserDto getProfile(@PathVariable UUID id) {
+    public UserDto getProfile(@Parameter(description = "ID del usuario") @PathVariable UUID id) {
         return getUserProfile.execute(id);
     }
 }

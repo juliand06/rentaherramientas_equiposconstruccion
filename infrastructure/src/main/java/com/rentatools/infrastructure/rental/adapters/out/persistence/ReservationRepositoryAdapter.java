@@ -4,6 +4,7 @@ import com.rentatools.domain.identity.model.valueobject.UserId;
 import com.rentatools.domain.rental.model.aggregate.Reservation;
 import com.rentatools.domain.rental.model.valueobject.ReservationId;
 import com.rentatools.domain.rental.port.repository.ReservationRepository;
+import com.rentatools.infrastructure.rental.adapters.out.persistence.entity.ReservationJpaEntity;
 import com.rentatools.infrastructure.rental.adapters.out.persistence.mappers.ReservationPersistenceMapper;
 import com.rentatools.infrastructure.rental.adapters.out.persistence.repositories.ReservationJpaRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,10 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
     @Override
     @Transactional
     public Reservation save(Reservation reservation) {
-        var entity = ReservationPersistenceMapper.toEntity(reservation);
+        String existingResNum = jpaRepository.findById(reservation.getId().value())
+                .map(ReservationJpaEntity::getReservationNumber)
+                .orElse(null);
+        var entity = ReservationPersistenceMapper.toEntity(reservation, existingResNum);
         return ReservationPersistenceMapper.toDomain(jpaRepository.save(entity));
     }
 

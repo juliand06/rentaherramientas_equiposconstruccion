@@ -6,6 +6,10 @@ import com.rentatools.application.catalog.usecase.GetToolUseCase;
 import com.rentatools.application.catalog.usecase.ListToolsUseCase;
 import com.rentatools.application.catalog.usecase.RegisterToolUseCase;
 import com.rentatools.infrastructure.catalog.adapters.in.rest.dtos.RegisterToolRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
-/** Controlador mínimo del catálogo: traduce request → command, llama al caso de uso, devuelve. Sin lógica. */
+/** Controlador del catálogo de herramientas y maquinaria de construcción */
+@Tag(name = "Herramientas", description = "Catálogo de herramientas y maquinaria para alquiler")
 @RestController
 @RequestMapping("/api/tools")
 public class ToolController {
@@ -35,6 +40,7 @@ public class ToolController {
         this.listTools = listTools;
     }
 
+    @Operation(summary = "Registrar nueva herramienta", description = "Registra una nueva herramienta en el catálogo del proveedor", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ToolDto register(@Valid @RequestBody RegisterToolRequest request) {
@@ -44,13 +50,15 @@ public class ToolController {
                 request.securityDeposit(), request.replacementValue()));
     }
 
+    @Operation(summary = "Consultar herramienta por ID", description = "Obtiene los detalles completos de una herramienta del catálogo")
     @GetMapping("/{id}")
-    public ToolDto get(@PathVariable UUID id) {
+    public ToolDto get(@Parameter(description = "ID de la herramienta") @PathVariable UUID id) {
         return getTool.execute(id);
     }
 
+    @Operation(summary = "Listar herramientas", description = "Lista todas las herramientas o filtra por categoría")
     @GetMapping
-    public List<ToolDto> list(@RequestParam(required = false) UUID categoryId) {
+    public List<ToolDto> list(@Parameter(description = "ID de la categoría (opcional)") @RequestParam(required = false) UUID categoryId) {
         return listTools.execute(categoryId);
     }
 }
