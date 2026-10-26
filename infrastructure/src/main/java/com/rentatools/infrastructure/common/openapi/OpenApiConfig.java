@@ -33,7 +33,7 @@ public class OpenApiConfig {
                                 .email("andreyricaurte10@gmail.com"))
                         .license(new License().name("Apache 2.0").url("https://www.apache.org/licenses/LICENSE-2.0")))
                 .servers(List.of(
-                        new Server().url("http://localhost:8080").description("Servidor de Desarrollo Local")
+                        new Server().url("/").description("Servidor de Desarrollo Local (Puerto Actual)")
                 ))
                 .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME))
                 .components(new Components()

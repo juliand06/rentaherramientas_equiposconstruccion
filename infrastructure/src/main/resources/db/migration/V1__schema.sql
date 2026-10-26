@@ -200,8 +200,12 @@ CREATE TABLE maintenance_records (
 CREATE TABLE reservations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     client_id UUID NOT NULL REFERENCES client_profiles(id) ON DELETE RESTRICT,
+    tool_id UUID REFERENCES tools(id) ON DELETE RESTRICT,
     reservation_number VARCHAR(50) NOT NULL UNIQUE,
     status VARCHAR(25) NOT NULL DEFAULT 'PENDING',
+    start_date DATE,
+    end_date DATE,
+    daily_rate NUMERIC(12, 2) DEFAULT 0.00,
     total_rental_amount NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
     total_deposit_amount NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
     expires_at TIMESTAMPTZ NOT NULL,
