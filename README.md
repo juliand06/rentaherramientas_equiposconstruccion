@@ -297,4 +297,17 @@ mvn clean test
 - [Diagrama Entidad-Relación](docs/database/diagrama-er.svg) — Modelo relacional completo en SVG.
 - [Colección Postman](docs/postman/) — Colección de requests y ambiente preconfigurado para pruebas de API.
 - [Especificación OpenAPI (Swagger)](docs/api/) — Contratos REST en formato JSON y YAML.
+- [Evidencias del Examen 1.5H (Devolución y Reporte de Daños)](docs/evidencias_examen/README.md) — Capturas de Swagger UI y PostgreSQL del examen funcional.
+
+---
+
+## 🛠 Examen 1.5H: Registro de Devolución y Reporte de Daños
+
+Se implementó el flujo de fin de ciclo de vida de alquiler con soporte para:
+- **Entidad `ReporteDano`:** Con `descripcion`, `costoReparacion` y `fechaReporte`.
+- **Modificación de `Reserva`:** Enum `EstadoDevolucion` (`PENDIENTE_DEVOLUCION`, `DEVUELTO_OK`, `DEVUELTO_CON_DAÑOS`).
+- **`DevolucionDTO`:** Con `estado`, `descripcionDano` y `costoReparacion`.
+- **`DevolucionService`:** Lógica de negocio para marcar `DEVUELTO_OK` o registrar daños en la tabla `ReporteDano` y marcar `DEVUELTO_CON_DAÑOS`.
+- **Endpoint REST:** `POST /api/reservas/{id}/registrar-devolucion` (Rol: Proveedor).
+- **Evidencias completas:** Ver carpeta [docs/evidencias_examen/](docs/evidencias_examen/README.md).
 
